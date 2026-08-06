@@ -1,0 +1,104 @@
+# =============================================================================
+#  AR Virtual Try-On Platform — Master Configuration
+# =============================================================================
+#  Every component (desktop app, FastAPI service, background jobs) reads from
+#  this single source of truth. Values can be overridden with environment
+#  variables, e.g.  ARTRYON__CAMERA__INDEX=1  (double underscore = nesting).
+# =============================================================================
+
+app:
+  name: "AR Virtual Try-On"
+  version: "1.0.0"
+  window_title: "AR Virtual Try-On Studio"
+  organization: "SnapStyle Labs"
+
+camera:
+  index: 0                    # webcam device index (0 = default)
+  width: 1280                 # requested capture width
+  height: 720                 # requested capture height
+  fps: 30                     # requested capture framerate
+  mirror: true                # selfie-view mirror flip (recommended for try-on)
+  buffer_size: 2              # frame queue size; small values = low latency
+  backend: "auto"             # auto | dshow | msmf | v4l2 | avfoundation
+
+vision:
+  pose:
+    model_complexity: 1       # 0 = fastest, 1 = balanced, 2 = most accurate
+    min_detection_confidence: 0.5
+    min_tracking_confidence: 0.5
+    smooth_landmarks: true
+    enable_segmentation: false
+  segmentation:
+    model_selection: 1        # 0 = general, 1 = landscape (better for upper body)
+  tracking:
+    min_visibility: 0.6       # landmarks below this are considered unreliable
+    smoothing_alpha: 0.45     # EMA factor: higher = snappier, lower = smoother
+    max_missing_frames: 5     # how long to hold last-good pose when tracking drops
+    lost_pose_timeout_s: 0.8  # seconds without a pose before the garment hides
+
+rendering:
+  shoulder_width_factor: 2.25   # garment width = shoulder distance * this factor
+  neck_offset_factor: 0.14      # garment top anchor = neck + offset * shoulder dist
+  perspective_tilt: true        # warp garment when shoulders are not level
+  max_rotation_deg: 35.0        # clamp garment rotation for stability
+  min_shoulder_width_px: 24     # below this, the person is too far to dress
+  shadow:
+    enabled: true
+    opacity: 0.25
+    blur_radius: 9
+    offset_x: 6
+    offset_y: 12
+  lighting:
+    enabled: true
+    match_scene_brightness: true   # subtly tone garment to scene exposure
+  occlusion:
+    use_arm_cutout: true           # hide garment where forearms cross the chest
+    arm_mask_dilation: 7
+
+studio:
+  enabled: false                # "Virtual Studio" background replacement
+  mode: "gradient"              # gradient | image | blur
+  background_image: "assets/studio/backdrop.png"   # used when mode == image
+  gradient_top: [24, 26, 38]    # BGR
+  gradient_bottom: [64, 78, 104]
+  blur_strength: 35             # kernel size when mode == blur
+  segmentation_threshold: 0.5
+
+ui:
+  show_fps: true
+  show_instructions: true
+  show_cloth_name: true
+  show_landmarks: false         # debug pose skeleton overlay
+  font_scale: 0.65
+  theme:
+    accent: [255, 178, 36]    # BGR accent colour
+    panel_bg: [18, 20, 28]
+    text: [245, 245, 245]
+  panel_opacity: 0.72
+
+output:
+  screenshots_dir: "output/screenshots"
+  recordings_dir: "output/recordings"
+  recording_fps: 24
+  recording_codec: "mp4v"     # mp4v (portable) | avc1 (needs codec) | XVID
+  screenshot_format: "png"
+  jpeg_quality: 92
+
+api:
+  host: "0.0.0.0"
+  port: 8000
+  stream_jpeg_quality: 80
+  stream_max_fps: 20          # cap for MJPEG + WebSocket push rate
+  websocket_path: "/ws/stream"
+
+clothes:
+  directory: "assets/clothes"
+  catalog_file: "catalog.json"   # optional per-item metadata; falls back to dir scan
+  default_item: null             # null = first item in the catalog
+
+logging:
+  level: "INFO"               # DEBUG | INFO | WARNING | ERROR
+  file: "logs/tryon.log"
+  max_bytes: 5242880          # 5 MB rotating file
+  backup_count: 3
+  format: "json"              # json | plain

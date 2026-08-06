@@ -1,0 +1,44 @@
+{
+  "items": [
+    {
+      "filename": "classic_tee.png",
+      "name": "Classic Tee \u2014 Crimson",
+      "category": "upper",
+      "anchor_top": 0.0,
+      "anchor_width": 1.0,
+      "description": "Procedurally generated demo garment (upper)."
+    },
+    {
+      "filename": "navy_hoodie.png",
+      "name": "Everyday Hoodie \u2014 Navy",
+      "category": "upper",
+      "anchor_top": 0.0,
+      "anchor_width": 1.0,
+      "description": "Procedurally generated demo garment (upper)."
+    },
+    {
+      "filename": "denim_jacket.png",
+      "name": "Trucker Jacket \u2014 Indigo",
+      "category": "jacket",
+      "anchor_top": 0.0,
+      "anchor_width": 1.0,
+      "description": "Procedurally generated demo garment (jacket)."
+    },
+    {
+      "filename": "summer_dress.png",
+      "name": "Flare Dress \u2014 Coral",
+      "category": "dress",
+      "anchor_top": 0.0,
+      "anchor_width": 1.0,
+      "description": "Procedurally generated demo garment (dress)."
+    },
+    {
+      "filename": "forest_polo.png",
+      "name": "Pique Polo \u2014 Forest",
+      "category": "upper",
+      "anchor_top": 0.0,
+      "anchor_width": 1.0,
+      "description": "Procedurally generated demo garment (upper)."
+    }
+  ]
+}

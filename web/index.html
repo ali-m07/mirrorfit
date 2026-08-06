@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AR Virtual Try-On — Live Demo</title>
+<style>
+  :root {
+    --bg: #0f1117; --panel: #181c26; --accent: #24b2ff; --text: #f2f4f8;
+    --muted: #8b93a5; --danger: #ff5470; --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: "Segoe UI", system-ui, sans-serif;
+    background: radial-gradient(1200px 600px at 70% -10%, #1c2436 0%, var(--bg) 55%);
+    color: var(--text); min-height: 100vh;
+  }
+  header { padding: 22px 32px 6px; }
+  header h1 { font-size: 20px; margin: 0; letter-spacing: .4px; }
+  header p { color: var(--muted); margin: 6px 0 0; font-size: 13px; }
+  main {
+    display: grid; grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 20px; padding: 18px 32px 32px; max-width: 1280px; margin: 0 auto;
+  }
+  .stage {
+    background: #000; border-radius: var(--radius); overflow: hidden;
+    aspect-ratio: 16 / 9; position: relative; border: 1px solid #232a3a;
+  }
+  .stage img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .stage .offline {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 10px; color: var(--muted);
+  }
+  .panel {
+    background: var(--panel); border: 1px solid #232a3a;
+    border-radius: var(--radius); padding: 18px; display: flex; flex-direction: column; gap: 10px;
+  }
+  .panel h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--muted); margin: 4px 0 8px; }
+  button {
+    background: #222a3c; color: var(--text); border: 1px solid #2e3850;
+    padding: 10px 12px; border-radius: 10px; font-size: 14px; cursor: pointer;
+    transition: background .15s, transform .05s;
+  }
+  button:hover { background: #2a3450; }
+  button:active { transform: scale(.98); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #062032; font-weight: 600; }
+  button.danger { background: #3a1d28; border-color: #57293a; color: var(--danger); }
+  select {
+    background: #222a3c; color: var(--text); border: 1px solid #2e3850;
+    padding: 10px; border-radius: 10px; font-size: 14px;
+  }
+  .row { display: flex; gap: 10px; }
+  .row > * { flex: 1; }
+  .status { font-size: 12px; color: var(--muted); display: flex; gap: 14px; flex-wrap: wrap; }
+  .status b { color: var(--text); font-weight: 600; }
+  .badge { padding: 2px 8px; border-radius: 999px; background: #123; color: var(--accent); }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>AR Virtual Try-On <span class="badge" id="recBadge" style="display:none">● REC</span></h1>
+  <p>Live demo — start a session, then switch garments and capture content.</p>
+</header>
+<main>
+  <div class="stage">
+    <div class="offline" id="offline">
+      <div style="font-size:34px">🪞</div>
+      <div>Session not started</div>
+      <div style="font-size:12px">Press “Start Session” — the live mirror will appear here</div>
+    </div>
+    <img id="feed" alt="live try-on feed" style="display:none" />
+  </div>
+  <div class="panel">
+    <h2>Session</h2>
+    <button class="primary" id="startBtn">▶ Start Session</button>
+    <button class="danger" id="stopBtn" disabled>■ Stop Session</button>
+    <div class="status">
+      <span>Mode <b id="stMode">upper</b></span>
+      <span>FPS <b id="stFps">–</b></span>
+      <span>Wearing <b id="stCloth">–</b></span>
+    </div>
+
+    <h2>Garment</h2>
+    <select id="clothSelect" disabled></select>
+    <div class="row">
+      <button id="prevBtn" disabled>← Prev</button>
+      <button id="nextBtn" disabled>Next →</button>
+    </div>
+
+    <h2>Capture</h2>
+    <button id="shotBtn" disabled>📸 Screenshot</button>
+    <button id="recBtn" disabled>⏺ Start Recording</button>
+
+    <h2>Experience</h2>
+    <div class="row">
+      <button id="studioBtn" disabled>🎬 Studio: Off</button>
+      <button id="modeBtn" disabled>🧍 Upper body</button>
+    </div>
+    <h2>Last capture</h2>
+    <div class="status" id="lastFile">–</div>
+  </div>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const feed = $("feed"), offline = $("offline");
+let sessionOn = false, recording = false, studioOn = false, fullBody = false;
+
+async function api(path, body) {
+  const opts = body !== undefined
+    ? { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body) }
+    : (path.startsWith("/tryon") ? { method: "POST" } : {});
+  const res = await fetch(path, opts);
+  if (!res.ok) throw new Error((await res.json()).detail || res.statusText);
+  return res.json();
+}
+
+function setControls(on) {
+  sessionOn = on;
+  ["stopBtn","clothSelect","prevBtn","nextBtn","shotBtn","recBtn","studioBtn","modeBtn"]
+    .forEach(id => $(id).disabled = !on);
+  $("startBtn").disabled = on;
+  if (on) { feed.src = "/stream.mjpeg?" + Date.now(); feed.style.display = "block"; offline.style.display = "none"; }
+  else { feed.src = ""; feed.style.display = "none"; offline.style.display = "flex"; }
+}
+
+async function refreshClothes() {
+  const data = await api("/clothes");
+  const sel = $("clothSelect");
+  sel.innerHTML = "";
+  data.items.forEach(i => {
+    const o = document.createElement("option");
+    o.value = i.id; o.textContent = i.name; sel.appendChild(o);
+  });
+}
+
+async function refreshStatus() {
+  if (!sessionOn) return;
+  try {
+    const s = await api("/status");
+    $("stFps").textContent = s.fps ?? "–";
+    $("stCloth").textContent = s.current_cloth ? s.current_cloth.name : "–";
+    $("stMode").textContent = s.mode;
+    if (s.current_cloth) $("clothSelect").value = s.current_cloth.id;
+    recording = s.recording;
+    $("recBadge").style.display = recording ? "inline-block" : "none";
+    $("recBtn").textContent = recording ? "⏹ Stop Recording" : "⏺ Start Recording";
+  } catch (e) { /* session may have ended */ }
+}
+
+$("startBtn").onclick = async () => {
+  try { await api("/tryon/start", {}); setControls(true); await refreshClothes(); }
+  catch (e) { alert("Could not start: " + e.message); }
+};
+$("stopBtn").onclick = async () => { await api("/tryon/stop", {}); setControls(false); };
+$("nextBtn").onclick = () => api("/tryon/change-cloth", {direction: "next"}).then(refreshStatus);
+$("prevBtn").onclick = () => api("/tryon/change-cloth", {direction: "previous"}).then(refreshStatus);
+$("clothSelect").onchange = (e) => api("/tryon/change-cloth", {cloth_id: e.target.value}).then(refreshStatus);
+$("shotBtn").onclick = async () => {
+  const r = await api("/tryon/screenshot", {});
+  $("lastFile").textContent = "📸 " + r.filename;
+};
+$("recBtn").onclick = async () => {
+  const r = await api("/tryon/record", {action: "toggle"});
+  $("lastFile").textContent = r.data.path ? "🎬 " + r.data.path.split(/[\\/]/).pop() : "–";
+  refreshStatus();
+};
+$("studioBtn").onclick = () => {
+  studioOn = !studioOn;
+  api("/tryon/studio", {enabled: studioOn});
+  $("studioBtn").textContent = "🎬 Studio: " + (studioOn ? "On" : "Off");
+};
+$("modeBtn").onclick = () => {
+  fullBody = !fullBody;
+  api("/tryon/mode", {mode: fullBody ? "full" : "upper"});
+  $("modeBtn").textContent = fullBody ? "🧍 Full body" : "🧍 Upper body";
+};
+
+setInterval(refreshStatus, 2000);
+refreshClothes();
+</script>
+</body>
+</html>

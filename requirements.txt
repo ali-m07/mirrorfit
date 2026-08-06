@@ -1,0 +1,25 @@
+# Core computer vision / AR stack
+opencv-python>=4.8.1,<4.11
+mediapipe>=0.10.9,<0.11
+numpy>=1.24.0,<3
+Pillow>=10.0.0,<12
+
+# Backend API layer
+fastapi>=0.104.0,<0.124
+uvicorn[standard]>=0.24.0,<0.36
+websockets>=12.0,<14
+pydantic>=2.4.0,<3
+python-multipart>=0.0.6
+
+# Optional web demo frontend
+streamlit>=1.28.0,<1.50
+
+# Configuration / environment
+PyYAML>=6.0.1,<7
+python-dotenv>=1.0.0,<2
+
+# Utilities
+requests>=2.31.0,<3
+
+# Testing
+pytest>=7.4.0,<9
