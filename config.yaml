@@ -14,16 +14,16 @@ app:
 
 camera:
   index: 0                    # webcam device index (0 = default)
-  width: 1280                 # requested capture width
-  height: 720                 # requested capture height
+  width: 640                  # 640x480 is much faster than 720p for real-time AR
+  height: 480                 # lower res = higher FPS, still good quality for try-on
   fps: 30                     # requested capture framerate
   mirror: true                # selfie-view mirror flip (recommended for try-on)
-  buffer_size: 2              # frame queue size; small values = low latency
-  backend: "auto"             # auto | dshow | msmf | v4l2 | avfoundation
+  buffer_size: 1              # frame queue size; 1 = always freshest frame (lowest latency)
+  backend: "dshow"            # auto | dshow | msmf | v4l2 | avfoundation (Windows: dshow is most reliable)
 
 vision:
   pose:
-    model_complexity: 1       # 0 = fastest, 1 = balanced, 2 = most accurate
+    model_complexity: 0       # 0 = fastest (30+ FPS), 1 = balanced, 2 = most accurate
     min_detection_confidence: 0.5
     min_tracking_confidence: 0.5
     smooth_landmarks: true
