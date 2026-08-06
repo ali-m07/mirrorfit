@@ -1,6 +1,6 @@
 # Core computer vision / AR stack
 opencv-python>=4.8.1,<4.11
-mediapipe>=0.10.9,<0.11
+mediapipe>=0.10.9,<0.10.15  # 0.10.14 = last with legacy `solutions` API (Pose/SelfieSegmentation)
 numpy>=1.24.0,<3
 Pillow>=10.0.0,<12
 
