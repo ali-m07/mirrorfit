@@ -97,70 +97,54 @@ class ClothingRenderer:
     def compute_placement(self, pose: PoseResult,
                           garment_shape: Tuple[int, int],
                           item: Optional[ClothingItem] = None) -> Optional[GarmentPlacement]:
-        """Compute the affine placement for the garment, or None to skip.
-
-        Fitting strategy:
-          1. Scale  = blend of shoulder width AND torso length (not just width).
-          2. Width  = shoulder span corrected for body turn (frontal ratio).
-          3. Height = shoulder->hip distance, so the hem lands at the waist.
-          4. Anchor = collar sits slightly above the shoulder midpoint,
-             proportionally to the torso length instead of the width.
-          5. Rotation = shoulder-line angle, EMA-smoothed and clamped.
-        """
+        """Compute the affine placement for the garment, or None to skip."""
         gh, gw = garment_shape
+        if gw <= 0 or gh <= 0:
+            return None
         ls = pose.point(LM_LEFT_SHOULDER)
         rs = pose.point(LM_RIGHT_SHOULDER)
         if ls is None or rs is None:
             return None
 
+        frame_w, frame_h = pose.frame_size
         shoulder_w = pose.shoulder_width_px
-        if shoulder_w < self.config.min_shoulder_width_px:
-            return None  # person too far from camera to dress convincingly
+        if (shoulder_w < self.config.min_shoulder_width_px
+                or not np.isfinite(shoulder_w)):
+            return None
 
-        category = (item.category if item else "upper").lower()
-
-        # -- 1. Width: compensate apparent shoulder shrink when turned -------
-        # A sideways pose projects a shorter shoulder line; dividing by the
-        # frontal ratio recovers the true width so the garment doesn't shrink.
-        frontal = max(pose.frontal_ratio, 0.45)  # clamp: don't explode sideways
-        true_shoulder_w = shoulder_w / frontal
+        # Width from the shoulder span, clamped hard against the frame size
+        # so a bad frame can never blow the garment up into a blob.
         anchor_width = item.anchor_width if item else 1.0
-        target_w = true_shoulder_w * self.config.shoulder_width_factor * anchor_width
+        target_w = shoulder_w * self.config.shoulder_width_factor * anchor_width
+        target_w = float(min(target_w, frame_w * 0.85))
 
-        # -- 2. Height: from torso length when hips are tracked --------------
-        torso_len = pose.torso_length_px if pose.hip_visibility >= 0.4 else 0.0
-        scale_from_w = target_w / max(gw, 1)
-        h_from_w = gh * scale_from_w
-        if torso_len > 10:
-            h_from_torso = torso_len * self._category_length_factor(category)
-            target_h = (1.0 - self._TORSO_SCALE_BLEND) * h_from_w \
-                       + self._TORSO_SCALE_BLEND * h_from_torso
-            # Dresses must at least reach below the hips.
-            if category in {"dress", "long"}:
-                target_h = max(target_h, h_from_torso)
-        else:
-            target_h = h_from_w
+        # Height keeps the garment's own aspect ratio.
+        target_h = gh * (target_w / gw)
+        target_h = float(min(target_h, frame_h * 0.95))
+        if target_w < 8 or target_h < 8:
+            return None
 
-        # -- 3. Anchor: collar slightly above shoulder midpoint --------------
+        # Anchor the garment TOP just above the shoulder midpoint, then derive
+        # the centre from it — this keeps the collar at the neck and stops the
+        # vertical drift that used to push the garment to the bottom.
         mid_x = (ls[0] + rs[0]) / 2.0
         mid_y = (ls[1] + rs[1]) / 2.0
-        # Neck lift scales with the torso (falls back to width when no hips),
-        # so tall/short people both get a natural collar height.
-        neck_base = torso_len if torso_len > 10 else shoulder_w * 1.1
-        neck_offset = neck_base * self._category_neck_factor(category) \
-                      * (self.config.neck_offset_factor / 0.14)
+        neck_lift = shoulder_w * self.config.neck_offset_factor
         anchor_top = (item.anchor_top if item else 0.0) * target_h
+        top_y = mid_y - neck_lift - anchor_top
         center_x = mid_x
-        center_y = (mid_y - neck_offset - anchor_top) + target_h / 2.0
+        center_y = top_y + target_h / 2.0
+        if not (np.isfinite(center_x) and np.isfinite(center_y)):
+            return None
 
-        # -- 4. Rotation: shoulder line, smoothed + clamped ------------------
+        # Rotation follows the shoulder line (clamped for stability).
         angle = pose.torso_angle_deg if self.config.perspective_tilt else 0.0
+        if not np.isfinite(angle):
+            angle = 0.0
         angle = float(np.clip(angle, -self.config.max_rotation_deg,
                               self.config.max_rotation_deg))
-        angle = self._smooth_angle(angle)
 
         # Affine transform: garment space -> frame space.
-        # Build by mapping the resized garment's center to the target center.
         transform = cv2.getRotationMatrix2D((target_w / 2.0, target_h / 2.0), angle, 1.0)
         transform[0, 2] += center_x - target_w / 2.0
         transform[1, 2] += center_y - target_h / 2.0
@@ -295,6 +279,27 @@ class ClothingRenderer:
         resized = self._apply_arm_occlusion(resized, pose, placement)
 
         h, w = frame.shape[:2]
+
+        # --- translate-only fast path (angle ~ 0): direct ROI blending ------
+        # warpAffine on the FULL frame every frame is slow and smears edges;
+        # when there is no rotation we can paste the resized garment directly.
+        if abs(placement.angle_deg) < 0.5:
+            cx, cy = placement.center
+            x0 = int(round(cx - gw / 2.0))
+            y0 = int(round(cy - gh / 2.0))
+            x1, y1 = x0 + gw, y0 + gh
+            # Clip to frame bounds; adjust the garment crop correspondingly.
+            fx0, fy0 = max(0, x0), max(0, y0)
+            fx1, fy1 = min(w, x1), min(h, y1)
+            if fx1 <= fx0 or fy1 <= fy0:
+                return False
+            gx0, gy0 = fx0 - x0, fy0 - y0
+            crop = resized[gy0:gy0 + (fy1 - fy0), gx0:gx0 + (fx1 - fx0)]
+            roi = frame[fy0:fy1, fx0:fx1]
+            alpha = (crop[:, :, 3:4].astype(np.float32)) / 255.0
+            rgb = crop[:, :, :3].astype(np.float32)
+            roi[:] = (rgb * alpha + roi.astype(np.float32) * (1.0 - alpha)).astype(np.uint8)
+            return True
 
         shadow = self._build_shadow(resized)
         if shadow is not None:

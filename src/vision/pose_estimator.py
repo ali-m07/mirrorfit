@@ -85,7 +85,8 @@ class PoseResult:
         l, r = self.point(LM_LEFT_SHOULDER), self.point(LM_RIGHT_SHOULDER)
         if l is None or r is None:
             return 0.0
-        return float(np.hypot(r[0] - l[0], r[1] - l[1]))
+        w = float(np.hypot(r[0] - l[0], r[1] - l[1]))
+        return w if np.isfinite(w) else 0.0
 
     @property
     def torso_angle_deg(self) -> float:

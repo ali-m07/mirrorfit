@@ -37,10 +37,10 @@ vision:
     lost_pose_timeout_s: 0.8  # seconds without a pose before the garment hides
 
 rendering:
-  shoulder_width_factor: 1.7    # garment width = true shoulder width * this (1.7 ≈ natural chest ease)
-  neck_offset_factor: 0.14      # baseline collar lift (scaled by torso length in the renderer)
+  shoulder_width_factor: 1.75   # garment width = shoulder distance * this factor
+  neck_offset_factor: 0.06      # collar lift: garment top anchored just above shoulders
   perspective_tilt: true        # warp garment when shoulders are not level
-  max_rotation_deg: 28.0        # tighter clamp: large tilts look like sliding, not turning
+  max_rotation_deg: 25.0        # clamp garment rotation for stability
   min_shoulder_width_px: 24     # below this, the person is too far to dress
   shadow:
     enabled: true
