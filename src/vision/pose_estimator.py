@@ -95,6 +95,54 @@ class PoseResult:
             return 0.0
         return float(np.degrees(np.arctan2(r[1] - l[1], r[0] - l[0])))
 
+    # -- richer body metrics for garment fitting ---------------------------
+
+    def visibility(self, index: int) -> float:
+        """Raw visibility of one landmark (0.0 when absent)."""
+        lm = self.landmarks.get(index)
+        return float(lm.visibility) if lm else 0.0
+
+    @property
+    def shoulder_visibility(self) -> float:
+        """Worse of the two shoulder visibilities — the fitting bottleneck."""
+        return min(self.visibility(LM_LEFT_SHOULDER),
+                   self.visibility(LM_RIGHT_SHOULDER))
+
+    @property
+    def hip_visibility(self) -> float:
+        return min(self.visibility(LM_LEFT_HIP),
+                   self.visibility(LM_RIGHT_HIP))
+
+    @property
+    def torso_length_px(self) -> float:
+        """Shoulder-mid to hip-mid distance; 0 when hips are not visible."""
+        sm, hm = self.shoulder_mid, self.hip_mid
+        if sm is None or hm is None:
+            return 0.0
+        return float(np.hypot(hm[0] - sm[0], hm[1] - sm[1]))
+
+    @property
+    def hip_width_px(self) -> float:
+        l, r = self.point(LM_LEFT_HIP), self.point(LM_RIGHT_HIP)
+        if l is None or r is None:
+            return 0.0
+        return float(np.hypot(r[0] - l[0], r[1] - l[1]))
+
+    @property
+    def frontal_ratio(self) -> float:
+        """How frontal the torso is: 1.0 = facing camera, ->0 = sideways.
+
+        Derived from how horizontal the shoulder line projects in the image;
+        used to compensate the apparent shoulder-width shrink when turning.
+        """
+        l, r = self.point(LM_LEFT_SHOULDER), self.point(LM_RIGHT_SHOULDER)
+        if l is None or r is None:
+            return 1.0
+        w = float(np.hypot(r[0] - l[0], r[1] - l[1]))
+        if w < 1e-6:
+            return 1.0
+        return float(abs(r[0] - l[0]) / w)
+
 
 class _EMAFilter:
     """Per-landmark exponential moving average with visibility-weighted gain."""

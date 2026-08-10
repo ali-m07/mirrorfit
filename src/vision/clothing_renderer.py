@@ -48,55 +48,116 @@ class GarmentPlacement:
 class ClothingRenderer:
     """Renders transparent PNG garments onto video frames, pose-aligned."""
 
+    # Blending weight of the torso length into the garment scale. The scale is
+    # derived from BOTH shoulder width and shoulder->hip length so the garment
+    # keeps a believable aspect instead of only stretching horizontally.
+    _TORSO_SCALE_BLEND = 0.35
+
+    # Fraction of torso length used to lift the garment top above the shoulder
+    # line. Tunable per category in _category_neck_factor().
+    _NECK_TORSO_FACTOR = 0.13
+
+    # Angle EMA gain per frame (lower = smoother rotation).
+    _ANGLE_SMOOTHING = 0.35
+
     def __init__(self, config: RenderingSection) -> None:
         self.config = config
+        self._angle_state: Optional[float] = None  # EMA of the garment angle
 
     # ------------------------------------------------------------------
     # Placement
     # ------------------------------------------------------------------
 
+    @staticmethod
+    def _category_neck_factor(category: str) -> float:
+        """Per-category tweak of how far the collar sits above the shoulders."""
+        return {
+            "dress": 0.16,   # dresses anchor slightly higher (neckline)
+            "long": 0.15,
+            "upper": 0.13,   # tees / hoodies / jackets
+        }.get(category, 0.13)
+
+    @staticmethod
+    def _category_length_factor(category: str) -> float:
+        """Vertical size multiplier per category when hips are available."""
+        return {
+            "dress": 1.55,   # cover torso + extend well below hips
+            "long": 1.35,
+            "upper": 1.15,   # hem just below the belt line
+        }.get(category, 1.15)
+
+    def _smooth_angle(self, angle: float) -> float:
+        """EMA on the rotation angle — kills frame-to-frame wobble."""
+        if self._angle_state is None:
+            self._angle_state = angle
+            return angle
+        self._angle_state += self._ANGLE_SMOOTHING * (angle - self._angle_state)
+        return self._angle_state
+
     def compute_placement(self, pose: PoseResult,
                           garment_shape: Tuple[int, int],
                           item: Optional[ClothingItem] = None) -> Optional[GarmentPlacement]:
-        """Compute the affine placement for the garment, or None to skip."""
+        """Compute the affine placement for the garment, or None to skip.
+
+        Fitting strategy:
+          1. Scale  = blend of shoulder width AND torso length (not just width).
+          2. Width  = shoulder span corrected for body turn (frontal ratio).
+          3. Height = shoulder->hip distance, so the hem lands at the waist.
+          4. Anchor = collar sits slightly above the shoulder midpoint,
+             proportionally to the torso length instead of the width.
+          5. Rotation = shoulder-line angle, EMA-smoothed and clamped.
+        """
         gh, gw = garment_shape
         ls = pose.point(LM_LEFT_SHOULDER)
         rs = pose.point(LM_RIGHT_SHOULDER)
         if ls is None or rs is None:
             return None
 
-        min_vis = 0.0  # visibility already filtered by the engine
         shoulder_w = pose.shoulder_width_px
         if shoulder_w < self.config.min_shoulder_width_px:
             return None  # person too far from camera to dress convincingly
 
-        # Garment width from shoulder span (with per-asset fine-tuning).
-        anchor_width = item.anchor_width if item else 1.0
-        target_w = shoulder_w * self.config.shoulder_width_factor * anchor_width
-        scale = target_w / max(gw, 1)
-        target_h = gh * scale
-
-        # Extend long garments (dresses) towards the hips when visible.
         category = (item.category if item else "upper").lower()
-        hip_mid = pose.hip_mid
-        if category in {"dress", "long"} and hip_mid is not None:
-            shoulder_mid_y = (ls[1] + rs[1]) / 2.0
-            torso_len = abs(hip_mid[1] - shoulder_mid_y)
-            if torso_len > 10:
-                target_h = max(target_h, torso_len * 1.35)
 
-        # Neck anchor: slightly above the shoulder midpoint.
+        # -- 1. Width: compensate apparent shoulder shrink when turned -------
+        # A sideways pose projects a shorter shoulder line; dividing by the
+        # frontal ratio recovers the true width so the garment doesn't shrink.
+        frontal = max(pose.frontal_ratio, 0.45)  # clamp: don't explode sideways
+        true_shoulder_w = shoulder_w / frontal
+        anchor_width = item.anchor_width if item else 1.0
+        target_w = true_shoulder_w * self.config.shoulder_width_factor * anchor_width
+
+        # -- 2. Height: from torso length when hips are tracked --------------
+        torso_len = pose.torso_length_px if pose.hip_visibility >= 0.4 else 0.0
+        scale_from_w = target_w / max(gw, 1)
+        h_from_w = gh * scale_from_w
+        if torso_len > 10:
+            h_from_torso = torso_len * self._category_length_factor(category)
+            target_h = (1.0 - self._TORSO_SCALE_BLEND) * h_from_w \
+                       + self._TORSO_SCALE_BLEND * h_from_torso
+            # Dresses must at least reach below the hips.
+            if category in {"dress", "long"}:
+                target_h = max(target_h, h_from_torso)
+        else:
+            target_h = h_from_w
+
+        # -- 3. Anchor: collar slightly above shoulder midpoint --------------
         mid_x = (ls[0] + rs[0]) / 2.0
         mid_y = (ls[1] + rs[1]) / 2.0
-        neck_offset = shoulder_w * self.config.neck_offset_factor
+        # Neck lift scales with the torso (falls back to width when no hips),
+        # so tall/short people both get a natural collar height.
+        neck_base = torso_len if torso_len > 10 else shoulder_w * 1.1
+        neck_offset = neck_base * self._category_neck_factor(category) \
+                      * (self.config.neck_offset_factor / 0.14)
         anchor_top = (item.anchor_top if item else 0.0) * target_h
         center_x = mid_x
         center_y = (mid_y - neck_offset - anchor_top) + target_h / 2.0
 
-        # Rotation follows the shoulder line (clamped for stability).
+        # -- 4. Rotation: shoulder line, smoothed + clamped ------------------
         angle = pose.torso_angle_deg if self.config.perspective_tilt else 0.0
         angle = float(np.clip(angle, -self.config.max_rotation_deg,
                               self.config.max_rotation_deg))
+        angle = self._smooth_angle(angle)
 
         # Affine transform: garment space -> frame space.
         # Build by mapping the resized garment's center to the target center.

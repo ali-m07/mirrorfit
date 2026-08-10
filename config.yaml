@@ -23,7 +23,7 @@ camera:
 
 vision:
   pose:
-    model_complexity: 0       # 0 = fastest (30+ FPS), 1 = balanced, 2 = most accurate
+    model_complexity: 1       # 1 = balanced: noticeably better hips/torso than 0, still real-time
     min_detection_confidence: 0.5
     min_tracking_confidence: 0.5
     smooth_landmarks: true
@@ -31,16 +31,16 @@ vision:
   segmentation:
     model_selection: 1        # 0 = general, 1 = landscape (better for upper body)
   tracking:
-    min_visibility: 0.6       # landmarks below this are considered unreliable
-    smoothing_alpha: 0.45     # EMA factor: higher = snappier, lower = smoother
+    min_visibility: 0.55      # slightly relaxed: keeps fitting alive when arms occlude
+    smoothing_alpha: 0.55     # snappier garment follow; angle is smoothed separately in renderer
     max_missing_frames: 5     # how long to hold last-good pose when tracking drops
     lost_pose_timeout_s: 0.8  # seconds without a pose before the garment hides
 
 rendering:
-  shoulder_width_factor: 2.25   # garment width = shoulder distance * this factor
-  neck_offset_factor: 0.14      # garment top anchor = neck + offset * shoulder dist
+  shoulder_width_factor: 1.7    # garment width = true shoulder width * this (1.7 ≈ natural chest ease)
+  neck_offset_factor: 0.14      # baseline collar lift (scaled by torso length in the renderer)
   perspective_tilt: true        # warp garment when shoulders are not level
-  max_rotation_deg: 35.0        # clamp garment rotation for stability
+  max_rotation_deg: 28.0        # tighter clamp: large tilts look like sliding, not turning
   min_shoulder_width_px: 24     # below this, the person is too far to dress
   shadow:
     enabled: true
