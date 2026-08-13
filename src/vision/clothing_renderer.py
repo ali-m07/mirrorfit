@@ -134,7 +134,11 @@ class ClothingRenderer:
                 target_h = max(target_h, torso_h)
         else:
             target_h = aspect_h
-        target_h = float(min(target_h, frame_h * 0.95))
+        # Long garments are allowed to extend below the visible frame; the
+        # compositor clips them safely. A shared 95% cap made dress and upper
+        # garments identical for long torsos.
+        height_cap = frame_h * (1.20 if category in {"dress", "long"} else 0.95)
+        target_h = float(min(target_h, height_cap))
         if target_w < 8 or target_h < 8:
             return None
 
