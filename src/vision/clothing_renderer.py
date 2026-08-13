@@ -213,8 +213,14 @@ class ClothingRenderer:
         vx, vy = -hy, hx
         if vx * (hm[0]-sm[0]) + vy * (hm[1]-sm[1]) < 0:
             vx, vy = -vx, -vy
-        target_width = shoulder * 1.45
-        target_height = min(torso * 1.12, pose.frame_size[1] * 0.72)
+        # The supplied block-out hoodie is intentionally fitted to the upper
+        # torso. Keep its silhouette inside the shoulders instead of letting
+        # the sleeves balloon beyond the tracked body.
+        target_width = shoulder * 1.16
+        target_height = min(torso * 0.98, pose.frame_size[1] * 0.62)
+        # Neckline sits a little above the shoulder midpoint.
+        anchor_x = sm[0] - vx * torso * 0.07
+        anchor_y = sm[1] - vy * torso * 0.07
         scale_x, scale_y = target_width / span_x, target_height / span_y
         projected = []
         for x, y, z in v:
@@ -223,8 +229,8 @@ class ClothingRenderer:
             # Small depth contribution gives a convincing volume cue without
             # changing the garment's body anchor.
             depth = (z - (zmin+zmax)/2) * scale_x * 0.06
-            projected.append((int(sm[0] + hx * px + vx * py + hx * depth),
-                              int(sm[1] + hy * px + vy * py + hy * depth), float(z)))
+            projected.append((int(anchor_x + hx * px + vx * py + hx * depth),
+                              int(anchor_y + hy * px + vy * py + hy * depth), float(z)))
         for a, b, c in sorted(faces, key=lambda f: sum(projected[i][2] for i in f)):
             pts = np.array([[projected[i][0], projected[i][1]] for i in (a,b,c)], dtype=np.int32)
             depth = sum(projected[i][2] for i in (a,b,c)) / 3
