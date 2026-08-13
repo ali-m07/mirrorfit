@@ -19,7 +19,7 @@ camera:
   fps: 30                     # requested capture framerate
   mirror: true                # selfie-view mirror flip (recommended for try-on)
   buffer_size: 1              # frame queue size; 1 = always freshest frame (lowest latency)
-  backend: "dshow"            # auto | dshow | msmf | v4l2 | avfoundation (Windows: dshow is most reliable)
+  backend: "auto"             # auto | dshow | msmf | v4l2 | avfoundation
 
 vision:
   pose:
@@ -79,7 +79,7 @@ ui:
 output:
   screenshots_dir: "output/screenshots"
   recordings_dir: "output/recordings"
-  recording_fps: 24
+  recording_fps: 30
   recording_codec: "mp4v"     # mp4v (portable) | avc1 (needs codec) | XVID
   screenshot_format: "png"
   jpeg_quality: 92
@@ -87,8 +87,8 @@ output:
 api:
   host: "0.0.0.0"
   port: 8000
-  stream_jpeg_quality: 80
-  stream_max_fps: 20          # cap for MJPEG + WebSocket push rate
+  stream_jpeg_quality: 88
+  stream_max_fps: 30          # match the camera while retaining low latency
   websocket_path: "/ws/stream"
 
 clothes:

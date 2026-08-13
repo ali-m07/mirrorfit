@@ -84,6 +84,8 @@
 
     <h2>Garment</h2>
     <select id="clothSelect" disabled></select>
+    <input id="clothFile" type="file" accept="image/png" />
+    <button id="uploadBtn">⬆ Upload PNG</button>
     <div class="row">
       <button id="prevBtn" disabled>← Prev</button>
       <button id="nextBtn" disabled>Next →</button>
@@ -158,6 +160,17 @@ $("stopBtn").onclick = async () => { await api("/tryon/stop", {}); setControls(f
 $("nextBtn").onclick = () => api("/tryon/change-cloth", {direction: "next"}).then(refreshStatus);
 $("prevBtn").onclick = () => api("/tryon/change-cloth", {direction: "previous"}).then(refreshStatus);
 $("clothSelect").onchange = (e) => api("/tryon/change-cloth", {cloth_id: e.target.value}).then(refreshStatus);
+$("uploadBtn").onclick = async () => {
+  const file = $("clothFile").files[0];
+  if (!file) return alert("Choose a transparent PNG first.");
+  const form = new FormData(); form.append("file", file);
+  try {
+    const r = await fetch("/clothes/upload", {method: "POST", body: form});
+    if (!r.ok) throw new Error((await r.json()).detail || r.statusText);
+    await fetch("/clothes/reload", {method: "POST"}); await refreshClothes();
+    $("lastFile").textContent = "✅ Garment uploaded";
+  } catch (e) { alert("Upload failed: " + e.message); }
+};
 $("shotBtn").onclick = async () => {
   const r = await api("/tryon/screenshot", {});
   $("lastFile").textContent = "📸 " + r.filename;

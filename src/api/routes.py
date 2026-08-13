@@ -8,10 +8,14 @@ under tests with a stubbed engine.
 from __future__ import annotations
 
 import asyncio
+import json
 import time
 from pathlib import Path
 
-from fastapi import APIRouter, HTTPException, Request, WebSocket, WebSocketDisconnect
+import cv2
+import numpy as np
+
+from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.responses import StreamingResponse
 
 from src.api.schemas import (
@@ -80,6 +84,59 @@ def list_clothes(request: Request) -> ClothesResponse:
     engine = _engine(request)
     items = [_item_schema(i) for i in engine.catalog.items]
     return ClothesResponse(count=len(items), items=items)
+
+
+@router.post("/clothes/upload", response_model=MessageResponse, tags=["catalog"])
+async def upload_cloth(request: Request, file: UploadFile = File(...),
+                       name: str | None = Form(None), category: str = Form("upper"),
+                       description: str = Form(""), anchor_top: float = Form(0.0),
+                       anchor_width: float = Form(1.0)) -> MessageResponse:
+    """Validate and add a transparent PNG, then refresh the live catalog."""
+    engine = _engine(request)
+    if not file.filename or Path(file.filename).suffix.lower() != ".png":
+        raise HTTPException(status_code=400, detail="Only PNG garments are supported")
+    if category not in {"upper", "dress", "long", "jacket"}:
+        raise HTTPException(status_code=400, detail="Unsupported garment category")
+    if not (-1 <= anchor_top <= 1 and 0.1 < anchor_width <= 3):
+        raise HTTPException(status_code=400, detail="Invalid anchor values")
+    data = await file.read()
+    if len(data) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="Garment exceeds 10 MB limit")
+    image = cv2.imdecode(np.frombuffer(data, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
+    if image is None or image.ndim != 3 or image.shape[2] != 4:
+        raise HTTPException(status_code=400, detail="PNG must contain an alpha channel")
+    h, w = image.shape[:2]
+    if w < 32 or h < 32 or not np.any(image[:, :, 3] > 0):
+        raise HTTPException(status_code=400, detail="Garment image is too small or empty")
+    target = engine.catalog.directory / Path(file.filename).name
+    target.write_bytes(data)
+    catalog_path = engine.catalog.catalog_path
+    try:
+        raw = json.loads(catalog_path.read_text(encoding="utf-8")) if catalog_path.exists() else {"items": []}
+        entries = raw.get("items", []) if isinstance(raw, dict) else raw
+        entries = [e for e in entries if e.get("filename") != target.name]
+        entries.append({"filename": target.name, "name": name or target.stem.replace("_", " ").title(),
+                        "category": category, "description": description,
+                        "anchor_top": anchor_top, "anchor_width": anchor_width})
+        catalog_path.write_text(json.dumps({"items": entries}, ensure_ascii=False, indent=2),
+                                encoding="utf-8")
+    except (OSError, json.JSONDecodeError) as exc:
+        target.unlink(missing_ok=True)
+        raise HTTPException(status_code=500, detail=f"Could not update catalog: {exc}") from exc
+    engine.catalog.reload()
+    item = engine.catalog.find(target.name)
+    # Metadata is intentionally kept in the API response for now; catalog
+    # rescans remain safe even if an upload client omits optional fields.
+    return MessageResponse(ok=True, message="Garment uploaded",
+                           data={"cloth": _item_schema(item).model_dump() if item else {}})
+
+
+@router.post("/clothes/reload", response_model=MessageResponse, tags=["catalog"])
+def reload_clothes(request: Request) -> MessageResponse:
+    engine = _engine(request)
+    engine.catalog.reload()
+    return MessageResponse(ok=True, message="Clothing catalog reloaded",
+                           data={"count": len(engine.catalog)})
 
 
 # ---------------------------------------------------------------------------

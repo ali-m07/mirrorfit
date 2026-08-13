@@ -29,6 +29,13 @@ class ClothesResponse(BaseModel):
     count: int
     items: List[ClothingItemSchema]
 
+class ClothingMetadata(BaseModel):
+    name: Optional[str] = None
+    category: str = "upper"
+    description: str = ""
+    anchor_top: float = Field(0.0, ge=-1.0, le=1.0)
+    anchor_width: float = Field(1.0, gt=0.1, le=3.0)
+
 
 # ---------------------------------------------------------------------------
 # Session control

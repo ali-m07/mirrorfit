@@ -72,7 +72,7 @@ class TryOnEngine:
         self._pose: Optional[PoseEstimator] = None
         self._segmenter: Optional[PersonSegmenter] = None
         self._studio: Optional[StudioCompositor] = None
-        self._renderer = ClothingRenderer(config.rendering)
+        self._renderer = ClothingRenderer(config.rendering, config.vision.tracking.min_visibility)
         self._ui = UIOverlay(config.ui)
 
         self._thread: Optional[threading.Thread] = None
@@ -83,6 +83,8 @@ class TryOnEngine:
         self._frame_lock = threading.Lock()
         self._latest_frame: Optional[np.ndarray] = None
         self._last_processed: Optional[np.ndarray] = None  # clean, no UI
+        self._last_pose: Optional[PoseResult] = None
+        self._last_garment_drawn = False
 
         # Recording
         self._rec_lock = threading.Lock()
@@ -175,6 +177,7 @@ class TryOnEngine:
 
         # 1. Pose
         pose = self._pose.process(frame) if self._pose else None
+        self._last_pose = pose
 
         # 2. Virtual Studio (background replacement)
         studio_on = bool(state and state.studio_enabled)
@@ -213,6 +216,7 @@ class TryOnEngine:
 
         with self._frame_lock:
             self._latest_frame = display
+        self._last_garment_drawn = garment_drawn
 
     # ------------------------------------------------------------------
     # HUD
@@ -443,7 +447,9 @@ class TryOnEngine:
             "recording": self.is_recording,
             "studio_enabled": bool(state and state.studio_enabled),
             "mode": state.mode if state else MODE_UPPER,
-            "tracking": state.frames_dressed > 0 if state else False,
+            "tracking": bool(self._last_pose and self._last_pose.tracked
+                              and self._last_pose.shoulder_visibility >= self.config.vision.tracking.min_visibility
+                              and self._last_garment_drawn),
             "current_cloth": item.to_dict() if item else None,
             "clothes_count": len(self.catalog),
             "fps": round(self._fps.fps, 1),

@@ -60,8 +60,9 @@ class ClothingRenderer:
     # Angle EMA gain per frame (lower = smoother rotation).
     _ANGLE_SMOOTHING = 0.35
 
-    def __init__(self, config: RenderingSection) -> None:
+    def __init__(self, config: RenderingSection, min_visibility: float = 0.55) -> None:
         self.config = config
+        self.min_visibility = min_visibility
         self._angle_state: Optional[float] = None  # EMA of the garment angle
 
     # ------------------------------------------------------------------
@@ -105,6 +106,8 @@ class ClothingRenderer:
         rs = pose.point(LM_RIGHT_SHOULDER)
         if ls is None or rs is None:
             return None
+        if not pose.tracked or pose.shoulder_visibility < self.min_visibility:
+            return None
 
         frame_w, frame_h = pose.frame_size
         shoulder_w = pose.shoulder_width_px
@@ -118,8 +121,19 @@ class ClothingRenderer:
         target_w = shoulder_w * self.config.shoulder_width_factor * anchor_width
         target_w = float(min(target_w, frame_w * 0.85))
 
-        # Height keeps the garment's own aspect ratio.
-        target_h = gh * (target_w / gw)
+        # Preserve the asset aspect ratio, but use the observed torso length
+        # when hips are reliable. This makes dresses/long garments extend
+        # naturally instead of behaving like every other upper-body item.
+        aspect_h = gh * (target_w / gw)
+        category = (item.category if item else "upper").lower()
+        torso_h = pose.torso_length_px * self._category_length_factor(category)
+        if pose.hip_visibility >= self.min_visibility and torso_h > 0:
+            target_h = max(aspect_h, aspect_h * (1 - self._TORSO_SCALE_BLEND)
+                           + torso_h * self._TORSO_SCALE_BLEND)
+            if category in {"dress", "long"}:
+                target_h = max(target_h, torso_h)
+        else:
+            target_h = aspect_h
         target_h = float(min(target_h, frame_h * 0.95))
         if target_w < 8 or target_h < 8:
             return None
@@ -129,7 +143,9 @@ class ClothingRenderer:
         # vertical drift that used to push the garment to the bottom.
         mid_x = (ls[0] + rs[0]) / 2.0
         mid_y = (ls[1] + rs[1]) / 2.0
-        neck_lift = shoulder_w * self.config.neck_offset_factor
+        neck_lift = max(shoulder_w * self.config.neck_offset_factor,
+                        pose.torso_length_px * self._category_neck_factor(category)
+                        if pose.torso_length_px > 0 else 0.0)
         anchor_top = (item.anchor_top if item else 0.0) * target_h
         top_y = mid_y - neck_lift - anchor_top
         center_x = mid_x
@@ -143,6 +159,7 @@ class ClothingRenderer:
             angle = 0.0
         angle = float(np.clip(angle, -self.config.max_rotation_deg,
                               self.config.max_rotation_deg))
+        angle = self._smooth_angle(angle)
 
         # Affine transform: garment space -> frame space.
         transform = cv2.getRotationMatrix2D((target_w / 2.0, target_h / 2.0), angle, 1.0)
@@ -295,6 +312,11 @@ class ClothingRenderer:
                 return False
             gx0, gy0 = fx0 - x0, fy0 - y0
             crop = resized[gy0:gy0 + (fy1 - fy0), gx0:gx0 + (fx1 - fx0)]
+            shadow = self._build_shadow(resized)
+            if shadow is not None:
+                shadow_crop = shadow[gy0:gy0 + (fy1 - fy0), gx0:gx0 + (fx1 - fx0)]
+                shadow_roi = frame[fy0:fy1, fx0:fx1]
+                self._blend_warped(shadow_roi, shadow_crop)
             roi = frame[fy0:fy1, fx0:fx1]
             alpha = (crop[:, :, 3:4].astype(np.float32)) / 255.0
             rgb = crop[:, :, :3].astype(np.float32)
