@@ -191,8 +191,12 @@ class TryOnEngine:
         if state and state.cloth_index is not None and len(self.catalog) > 0:
             try:
                 item = self.catalog.get(state.cloth_index)
-                garment = self.catalog.load_image(item)
-                garment_drawn = self._renderer.render(frame, garment, pose, item)
+                if item.path.suffix.lower() == ".obj":
+                    vertices, faces = self.catalog.load_mesh(item)
+                    garment_drawn = self._renderer.render_mesh(frame, vertices, faces, pose, item)
+                else:
+                    garment = self.catalog.load_image(item)
+                    garment_drawn = self._renderer.render(frame, garment, pose, item)
                 if garment_drawn:
                     state.frames_dressed += 1
             except (FileNotFoundError, ValueError) as exc:

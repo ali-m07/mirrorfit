@@ -55,7 +55,7 @@ def _slugify(text: str) -> str:
 class ClothingCatalog:
     """Discovers and lazily loads transparent PNG garments."""
 
-    SUPPORTED_EXTENSIONS = {".png"}
+    SUPPORTED_EXTENSIONS = {".png", ".obj"}
 
     def __init__(self, directory: Path, catalog_file: str = "catalog.json",
                  extra_dirs: Optional[List[Path]] = None) -> None:
@@ -79,13 +79,14 @@ class ClothingCatalog:
                 logger.warning("Clothes directory missing, creating: %s", base)
                 base.mkdir(parents=True, exist_ok=True)
                 continue
-            for png in sorted(base.glob("*.png")):
-                meta = metadata.get(png.stem, {})
+            for asset in sorted(p for p in base.iterdir()
+                               if p.is_file() and p.suffix.lower() in self.SUPPORTED_EXTENSIONS):
+                meta = metadata.get(asset.stem, {})
                 item = ClothingItem(
-                    id=str(meta.get("id") or _slugify(png.stem)),
-                    name=str(meta.get("name") or png.stem.replace("_", " ").title()),
-                    filename=png.name,
-                    path=png,
+                    id=str(meta.get("id") or _slugify(asset.stem)),
+                    name=str(meta.get("name") or asset.stem.replace("_", " ").title()),
+                    filename=asset.name,
+                    path=asset,
                     category=str(meta.get("category", "upper")),
                     anchor_top=float(meta.get("anchor_top", 0.0)),
                     anchor_width=float(meta.get("anchor_width", 1.0)),
@@ -147,6 +148,25 @@ class ClothingCatalog:
             raise ValueError(f"Unsupported garment channels ({image.shape[2]}): {item.path}")
         self._cache[item.id] = image
         return image
+
+    def load_mesh(self, item: ClothingItem):
+        """Load a Wavefront OBJ as ``(vertices, triangular_faces)``."""
+        if item.path.suffix.lower() != ".obj":
+            raise ValueError(f"Not an OBJ garment: {item.path}")
+        vertices, faces = [], []
+        with item.path.open("r", encoding="utf-8") as fh:
+            for line in fh:
+                parts = line.split()
+                if not parts: continue
+                if parts[0] == "v" and len(parts) >= 4:
+                    vertices.append(tuple(float(v) for v in parts[1:4]))
+                elif parts[0] == "f" and len(parts) >= 4:
+                    idx = [int(p.split("/")[0]) - 1 for p in parts[1:]]
+                    for i in range(1, len(idx) - 1):
+                        faces.append((idx[0], idx[i], idx[i + 1]))
+        if not vertices or not faces:
+            raise ValueError(f"OBJ has no renderable geometry: {item.path}")
+        return np.asarray(vertices, dtype=np.float32), faces
 
 
 # ---------------------------------------------------------------------------

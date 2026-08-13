@@ -182,6 +182,47 @@ class ClothingRenderer:
     # Effects
     # ------------------------------------------------------------------
 
+    def render_mesh(self, frame: np.ndarray, vertices: np.ndarray, faces,
+                    pose: Optional[PoseResult], item: Optional[ClothingItem] = None) -> bool:
+        """Project a low-poly garment mesh onto the tracked torso.
+
+        This is a lightweight CPU renderer for OBJ assets: it preserves mesh
+        depth ordering and produces real 3D silhouette geometry without adding
+        a heavyweight OpenGL dependency to the desktop app.
+        """
+        if pose is None or not pose.tracked or pose.shoulder_visibility < self.min_visibility:
+            return False
+        sm, hm = pose.shoulder_mid, pose.hip_mid
+        if sm is None or hm is None or not len(vertices):
+            return False
+        ls, rs = pose.point(LM_LEFT_SHOULDER), pose.point(LM_RIGHT_SHOULDER)
+        if ls is None or rs is None:
+            return False
+        v = np.asarray(vertices, dtype=np.float32)
+        xmin, xmax = float(v[:, 0].min()), float(v[:, 0].max())
+        ymin, ymax = float(v[:, 1].min()), float(v[:, 1].max())
+        zmin, zmax = float(v[:, 2].min()), float(v[:, 2].max())
+        span_x, span_y = max(xmax - xmin, 1e-6), max(ymax - ymin, 1e-6)
+        torso = max(float(np.hypot(hm[0]-sm[0], hm[1]-sm[1])), 1.0)
+        shoulder = max(float(np.hypot(rs[0]-ls[0], rs[1]-ls[1])), 1.0)
+        angle = math.atan2(rs[1]-ls[1], rs[0]-ls[0])
+        scale_x, scale_y = shoulder * 1.55 / span_x, torso * 1.15 / span_y
+        projected = []
+        ca, sa = math.cos(angle), math.sin(angle)
+        for x, y, z in v:
+            px = (x - (xmin+xmax)/2) * scale_x
+            py = (ymax - y) * scale_y
+            # Small depth contribution gives a convincing turn/volume cue.
+            px += (z - (zmin+zmax)/2) * scale_x * 0.10
+            projected.append((int(sm[0] + px*ca - py*sa),
+                              int(sm[1] + px*sa + py*ca), float(z)))
+        for a, b, c in sorted(faces, key=lambda f: sum(projected[i][2] for i in f)):
+            pts = np.array([[projected[i][0], projected[i][1]] for i in (a,b,c)], dtype=np.int32)
+            depth = sum(projected[i][2] for i in (a,b,c)) / 3
+            shade = int(np.clip(135 + 55 * (depth-zmin) / max(zmax-zmin, 1e-6), 80, 210))
+            cv2.fillConvexPoly(frame, pts, (shade//3, shade//2, shade), lineType=cv2.LINE_AA)
+        return True
+
     def _match_scene_brightness(self, garment: np.ndarray, frame: np.ndarray,
                                 placement: GarmentPlacement) -> np.ndarray:
         """Tone the garment towards the scene's local exposure."""
