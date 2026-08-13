@@ -205,17 +205,26 @@ class ClothingRenderer:
         span_x, span_y = max(xmax - xmin, 1e-6), max(ymax - ymin, 1e-6)
         torso = max(float(np.hypot(hm[0]-sm[0], hm[1]-sm[1])), 1.0)
         shoulder = max(float(np.hypot(rs[0]-ls[0], rs[1]-ls[1])), 1.0)
-        angle = math.atan2(rs[1]-ls[1], rs[0]-ls[0])
-        scale_x, scale_y = shoulder * 1.55 / span_x, torso * 1.15 / span_y
+        # Build an orthonormal body basis. The mesh's highest point is
+        # anchored at the shoulder line and its lowest point is constrained to
+        # the hip/torso region; this prevents the hoodie from sitting on the
+        # user's head when an OBJ has a tall hood.
+        hx, hy = (rs[0]-ls[0]) / shoulder, (rs[1]-ls[1]) / shoulder
+        vx, vy = -hy, hx
+        if vx * (hm[0]-sm[0]) + vy * (hm[1]-sm[1]) < 0:
+            vx, vy = -vx, -vy
+        target_width = shoulder * 1.45
+        target_height = min(torso * 1.12, pose.frame_size[1] * 0.72)
+        scale_x, scale_y = target_width / span_x, target_height / span_y
         projected = []
-        ca, sa = math.cos(angle), math.sin(angle)
         for x, y, z in v:
             px = (x - (xmin+xmax)/2) * scale_x
             py = (ymax - y) * scale_y
-            # Small depth contribution gives a convincing turn/volume cue.
-            px += (z - (zmin+zmax)/2) * scale_x * 0.10
-            projected.append((int(sm[0] + px*ca - py*sa),
-                              int(sm[1] + px*sa + py*ca), float(z)))
+            # Small depth contribution gives a convincing volume cue without
+            # changing the garment's body anchor.
+            depth = (z - (zmin+zmax)/2) * scale_x * 0.06
+            projected.append((int(sm[0] + hx * px + vx * py + hx * depth),
+                              int(sm[1] + hy * px + vy * py + hy * depth), float(z)))
         for a, b, c in sorted(faces, key=lambda f: sum(projected[i][2] for i in f)):
             pts = np.array([[projected[i][0], projected[i][1]] for i in (a,b,c)], dtype=np.int32)
             depth = sum(projected[i][2] for i in (a,b,c)) / 3
