@@ -36,6 +36,12 @@ class ClothingMetadata(BaseModel):
     anchor_top: float = Field(0.0, ge=-1.0, le=1.0)
     anchor_width: float = Field(1.0, gt=0.1, le=3.0)
 
+class ClothingUpdate(BaseModel):
+    name: Optional[str] = None
+    category: Optional[Literal["upper", "dress", "long", "jacket"]] = None
+    description: Optional[str] = None
+    anchor_top: Optional[float] = Field(default=None, ge=-1.0, le=1.0)
+    anchor_width: Optional[float] = Field(default=None, gt=0.1, le=3.0)
 
 # ---------------------------------------------------------------------------
 # Session control
