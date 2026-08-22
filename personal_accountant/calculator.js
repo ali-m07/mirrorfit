@@ -83,20 +83,34 @@ function isDateBeforeOrEqual(jy1, jm1, jd1, jy2, jm2, jd2) {
   return jd1 <= jd2;
 }
 
+function parseTargetMonth(str) {
+  if (!str) return null;
+  const parts = String(str).replace(/-/g, '/').split('/');
+  if (parts.length < 2) return null;
+  return [parseInt(parts[0], 10), parseInt(parts[1], 10)];
+}
+
+function matchesTargetMonth(item, targetYear, targetMonth) {
+  const tm = parseTargetMonth(item.targetMonth || item.forMonth);
+  if (!tm) return true;
+  return tm[0] === targetYear && tm[1] === targetMonth;
+}
+
 function isTempExpenseActive(expense, targetYear, targetMonth) {
   if (!expense.endDate) return true;
   const end = parseJalaliDate(expense.endDate);
   if (!end) return true;
-  const [ey, em, ed] = end;
+  const [ey, em] = end;
   if (targetYear > ey) return false;
   if (targetYear < ey) return true;
   if (targetMonth > em) return false;
-  if (targetMonth < em) return true;
   return true;
 }
 
 function calculateMonthBudget(data, targetYear, targetMonth) {
-  const totalIncome = data.incomes.reduce((sum, i) => sum + parseAmount(i.amount), 0);
+  const totalIncome = data.incomes
+    .filter(i => matchesTargetMonth(i, targetYear, targetMonth))
+    .reduce((sum, i) => sum + parseAmount(i.amount), 0);
 
   const fixedTotal = data.fixedExpenses.reduce((sum, e) => sum + parseAmount(e.amount), 0);
 
@@ -104,12 +118,16 @@ function calculateMonthBudget(data, targetYear, targetMonth) {
     .filter(e => isTempExpenseActive(e, targetYear, targetMonth))
     .reduce((sum, e) => sum + parseAmount(e.amount), 0);
 
+  const activeOneTime = data.oneTimeExpenses
+    .filter(e => matchesTargetMonth(e, targetYear, targetMonth));
+
+  const oneTimeTotal = activeOneTime.reduce((sum, e) => sum + parseAmount(e.amount), 0);
+
   const [todayY, todayM] = getTodayJalali();
   const isCurrentMonth = targetYear === todayY && targetMonth === todayM;
-
-  const oneTimeTotal = isCurrentMonth
-    ? data.oneTimeExpenses.reduce((sum, e) => sum + parseAmount(e.amount), 0)
-    : 0;
+  const isPlanningMonth = data.planningMonth
+    && data.planningMonth.year === targetYear
+    && data.planningMonth.month === targetMonth;
 
   const totalExpenses = fixedTotal + tempTotal + oneTimeTotal;
   const available = totalIncome - totalExpenses;
@@ -125,18 +143,30 @@ function calculateMonthBudget(data, targetYear, targetMonth) {
     totalExpenses,
     available,
     isCurrentMonth,
+    isPlanningMonth,
     expenseBreakdown: [
       ...data.fixedExpenses.map(e => ({ name: e.name, amount: parseAmount(e.amount), type: 'ثابت' })),
       ...data.tempExpenses
         .filter(e => isTempExpenseActive(e, targetYear, targetMonth))
         .map(e => ({ name: e.name, amount: parseAmount(e.amount), type: 'موقت' })),
-      ...(isCurrentMonth ? data.oneTimeExpenses.map(e => ({ name: e.name, amount: parseAmount(e.amount), type: 'یک‌باره' })) : [])
+      ...activeOneTime.map(e => ({ name: e.name, amount: parseAmount(e.amount), type: 'یک‌باره' }))
     ]
   };
 }
 
+function getPlanningMonth(data) {
+  if (data.planningMonth) {
+    return [data.planningMonth.year, data.planningMonth.month];
+  }
+  const [y, m] = getTodayJalali();
+  let nm = m + 1;
+  let ny = y;
+  if (nm > 12) { nm = 1; ny += 1; }
+  return [ny, nm];
+}
+
 function getForecast(data, monthsAhead = 6) {
-  const [startY, startM] = getTodayJalali();
+  const [startY, startM] = getPlanningMonth(data);
   const forecast = [];
 
   for (let i = 0; i < monthsAhead; i++) {
@@ -158,11 +188,18 @@ function getBudgetStatus(available, totalIncome) {
   return { label: 'مناسب', class: 'good' };
 }
 
-function getDailyBudget(available) {
-  const now = new Date();
-  const [jy, jm, jd] = getTodayJalali();
-  const daysInMonth = jm <= 6 ? 31 : (jm <= 11 ? 30 : (isLeapJalali(jy) ? 30 : 29));
-  const remainingDays = Math.max(1, daysInMonth - jd + 1);
+function getDailyBudget(available, targetYear, targetMonth) {
+  const [todayY, todayM, todayD] = getTodayJalali();
+  const daysInMonth = targetMonth <= 6 ? 31 : (targetMonth <= 11 ? 30 : (isLeapJalali(targetYear) ? 30 : 29));
+
+  let remainingDays;
+  if (targetYear === todayY && targetMonth === todayM) {
+    remainingDays = Math.max(1, daysInMonth - todayD + 1);
+  } else if (targetYear < todayY || (targetYear === todayY && targetMonth < todayM)) {
+    remainingDays = 1;
+  } else {
+    remainingDays = daysInMonth;
+  }
   return available / remainingDays;
 }
 

@@ -1,8 +1,9 @@
-const STORAGE_KEY = 'personal_accountant_data';
+const STORAGE_KEY = 'personal_accountant_data_v2';
 
 const DEFAULT_DATA = {
+  planningMonth: { year: 1405, month: 6 },
   incomes: [
-    { id: 'inc1', name: 'حقوق ماهانه', amount: 64000000 }
+    { id: 'inc1', name: 'حقوق مرداد (برای شهریور)', amount: 64000000, forMonth: '1405/06' }
   ],
   fixedExpenses: [
     { id: 'fix1', name: 'دیجی‌پی', amount: 9500000 },
@@ -16,7 +17,7 @@ const DEFAULT_DATA = {
     { id: 'tmp4', name: 'قسط شرکت', amount: 6500000, endDate: '1405/12/29' }
   ],
   oneTimeExpenses: [
-    { id: 'ot1', name: 'بدهی اضافی این ماه', amount: 18000000 }
+    { id: 'ot1', name: 'بدهی اضافی', amount: 18000000, targetMonth: '1405/06' }
   ]
 };
 
@@ -40,7 +41,8 @@ function uid() {
 }
 
 function addIncome() {
-  appData.incomes.push({ id: uid(), name: 'درآمد جدید', amount: 0 });
+  const [py, pm] = getPlanningMonth(appData);
+  appData.incomes.push({ id: uid(), name: 'درآمد جدید', amount: 0, forMonth: `${py}/${String(pm).padStart(2, '0')}` });
   saveData();
 }
 
@@ -55,7 +57,8 @@ function addTempExpense() {
 }
 
 function addOneTimeExpense() {
-  appData.oneTimeExpenses.push({ id: uid(), name: 'هزینه یک‌باره', amount: 0 });
+  const [py, pm] = getPlanningMonth(appData);
+  appData.oneTimeExpenses.push({ id: uid(), name: 'هزینه یک‌باره', amount: 0, targetMonth: `${py}/${String(pm).padStart(2, '0')}` });
   saveData();
 }
 
@@ -87,6 +90,11 @@ function renderItemList(containerId, items, listName, fields) {
           onchange="updateItem('${listName}','${item.id}','${f.key}',this.value)"
           placeholder="1405/07/29">`;
       }
+      if (f.type === 'month') {
+        return `<input class="date-input" type="text" value="${item[f.key] || ''}"
+          onchange="updateItem('${listName}','${item.id}','${f.key}',this.value)"
+          placeholder="1405/06" title="ماه مقصد">`;
+      }
       return `<input type="text" value="${item[f.key]}"
         onchange="updateItem('${listName}','${item.id}','${f.key}',this.value)"
         placeholder="نام">`;
@@ -99,54 +107,58 @@ function renderItemList(containerId, items, listName, fields) {
   }).join('');
 }
 
-function renderSummary(current) {
+function renderSummary(planning) {
   const cards = document.getElementById('summaryCards');
-  const balanceClass = current.available >= 0 ? 'positive' : 'negative';
+  const balanceClass = planning.available >= 0 ? 'positive' : 'negative';
+  const monthLabel = `${planning.monthName} ${planning.year}`;
 
   cards.innerHTML = `
     <div class="card">
-      <div class="card-label">درآمد این ماه</div>
-      <div class="card-value income">${formatMoney(current.totalIncome)}</div>
+      <div class="card-label">درآمد ${monthLabel}</div>
+      <div class="card-value income">${formatMoney(planning.totalIncome)}</div>
+      <div class="card-sub">حقوق مرداد برای خرج‌های شهریور</div>
     </div>
     <div class="card">
-      <div class="card-label">کل اقساط و بدهی</div>
-      <div class="card-value expense">${formatMoney(current.totalExpenses)}</div>
-      <div class="card-sub">ثابت: ${formatMoney(current.fixedTotal)} | موقت: ${formatMoney(current.tempTotal)}${current.oneTimeTotal ? ' | یک‌باره: ' + formatMoney(current.oneTimeTotal) : ''}</div>
+      <div class="card-label">کل اقساط و بدهی ${monthLabel}</div>
+      <div class="card-value expense">${formatMoney(planning.totalExpenses)}</div>
+      <div class="card-sub">ثابت: ${formatMoney(planning.fixedTotal)} | موقت: ${formatMoney(planning.tempTotal)}${planning.oneTimeTotal ? ' | یک‌باره: ' + formatMoney(planning.oneTimeTotal) : ''}</div>
     </div>
     <div class="card">
-      <div class="card-label">قابل خرج این ماه</div>
-      <div class="card-value balance ${balanceClass}">${formatMoney(current.available)}</div>
-      <div class="card-sub">روزانه ~ ${formatMoney(getDailyBudget(current.available))}</div>
+      <div class="card-label">قابل خرج ${monthLabel}</div>
+      <div class="card-value balance ${balanceClass}">${formatMoney(planning.available)}</div>
+      <div class="card-sub">روزانه ~ ${formatMoney(getDailyBudget(planning.available, planning.year, planning.month))}</div>
     </div>
     <div class="card">
       <div class="card-label">درصد پوشش اقساط</div>
-      <div class="card-value">${current.totalIncome > 0 ? Math.round(current.totalExpenses / current.totalIncome * 100) : 0}٪</div>
+      <div class="card-value">${planning.totalIncome > 0 ? Math.round(planning.totalExpenses / planning.totalIncome * 100) : 0}٪</div>
       <div class="card-sub">از درآمد صرف اقساط می‌شود</div>
     </div>
   `;
 }
 
-function renderAlert(current) {
+function renderAlert(planning) {
   const box = document.getElementById('alertBox');
-  if (current.available < 0) {
+  const monthLabel = planning.monthName;
+  if (planning.available < 0) {
     box.innerHTML = `<div class="alert danger">
-      ⚠️ <strong>کسری ${formatMoney(Math.abs(current.available))}!</strong>
-      اقساط و بدهی‌های این ماه از درآمدت بیشتره. باید ${formatMoney(Math.abs(current.available))} از پس‌انداز یا جای دیگه تأمین کنی.
+      ⚠️ <strong>کسری ${formatMoney(Math.abs(planning.available))} در ${monthLabel}!</strong>
+      حقوق مرداد (۶۴M) برای پوشش اقساط و بدهی‌های شهریور کافی نیست.
+      ${formatMoney(Math.abs(planning.available))} باید از پس‌انداز یا جای دیگه تأمین بشه.
     </div>`;
-  } else if (current.available / current.totalIncome < 0.15) {
+  } else if (planning.available / planning.totalIncome < 0.15) {
     box.innerHTML = `<div class="alert warning">
-      ⚡ <strong>ماه سخت!</strong> فقط ${formatMoney(current.available)} برای کل خرج‌های زندگی (خوراک، حمل‌ونقل، تفریح...) داری.
-      روزانه حدود ${formatMoney(getDailyBudget(current.available))} — خیلی محدوده!
+      ⚡ <strong>${monthLabel} سخت!</strong> فقط ${formatMoney(planning.available)} برای کل خرج‌های زندگی داری.
+      روزانه حدود ${formatMoney(getDailyBudget(planning.available, planning.year, planning.month))} — خیلی محدوده!
     </div>`;
   } else {
     box.innerHTML = `<div class="alert success">
-      ✅ وضعیت مالی این ماه قابل مدیریته. ${formatMoney(current.available)} برای خرج‌های روزمره داری
-      (روزانه ~ ${formatMoney(getDailyBudget(current.available))}).
+      ✅ ${monthLabel} قابل مدیریته. ${formatMoney(planning.available)} برای خرج‌های روزمره داری
+      (روزانه ~ ${formatMoney(getDailyBudget(planning.available, planning.year, planning.month))}).
     </div>`;
   }
 }
 
-function renderForecast(forecast) {
+function renderForecast(forecast, planning) {
   const maxVal = Math.max(...forecast.map(f => f.totalIncome), 1);
 
   const chart = document.getElementById('forecastChart');
@@ -154,22 +166,27 @@ function renderForecast(forecast) {
     const incomeH = (f.totalIncome / maxVal) * 140;
     const expenseH = (f.totalExpenses / maxVal) * 140;
     const balanceH = (Math.max(f.available, 0) / maxVal) * 140;
+    const isPlanning = f.isPlanningMonth;
     return `<div class="bar-group">
       <div class="bar-container">
         <div class="bar income-bar" style="height:${incomeH}px" title="درآمد: ${formatMoney(f.totalIncome)}"></div>
         <div class="bar expense-bar" style="height:${expenseH}px" title="اقساط: ${formatMoney(f.totalExpenses)}"></div>
         <div class="bar balance-bar" style="height:${balanceH}px" title="قابل خرج: ${formatMoney(f.available)}"></div>
       </div>
-      <div class="bar-label">${f.monthName}${f.isCurrentMonth ? ' ★' : ''}</div>
+      <div class="bar-label">${f.monthName}${isPlanning ? ' ★' : ''}${f.isCurrentMonth ? ' (الان)' : ''}</div>
     </div>`;
   }).join('');
 
   const tbody = document.getElementById('forecastBody');
   tbody.innerHTML = forecast.map(f => {
-    const status = getBudgetStatus(f.available, f.totalIncome);
+    const status = getBudgetStatus(f.available, f.totalIncome || 1);
     const availClass = f.available >= 0 ? '' : 'style="color:var(--danger)"';
-    return `<tr>
-      <td>${f.monthName} ${f.year}${f.isCurrentMonth ? ' (الان)' : ''}</td>
+    const tags = [];
+    if (f.isPlanningMonth) tags.push('بودجه فعلی');
+    if (f.isCurrentMonth) tags.push('امروز');
+    const tagStr = tags.length ? ` (${tags.join('، ')})` : '';
+    return `<tr${f.isPlanningMonth ? ' class="planning-row"' : ''}>
+      <td>${f.monthName} ${f.year}${tagStr}</td>
       <td class="amount">${formatMoney(f.totalIncome)}</td>
       <td class="amount">${formatMoney(f.totalExpenses)}</td>
       <td class="amount" ${availClass}>${formatMoney(f.available)}</td>
@@ -178,32 +195,34 @@ function renderForecast(forecast) {
   }).join('');
 }
 
-function renderBudgetBreakdown(current) {
+function renderBudgetBreakdown(planning) {
   const container = document.getElementById('budgetBreakdown');
-  const rows = current.expenseBreakdown.map(e =>
+  const monthLabel = `${planning.monthName} ${planning.year}`;
+  const rows = planning.expenseBreakdown.map(e =>
     `<div class="budget-row">
       <span class="label">${e.name} <small>(${e.type})</small></span>
       <span class="value">${formatMoney(e.amount)}</span>
     </div>`
   ).join('');
 
-  const expenseRatio = current.totalIncome > 0
-    ? Math.min(100, (current.totalExpenses / current.totalIncome) * 100)
+  const expenseRatio = planning.totalIncome > 0
+    ? Math.min(100, (planning.totalExpenses / planning.totalIncome) * 100)
     : 0;
 
   container.innerHTML = `
+    <p class="budget-note">📌 بودجه ${monthLabel} — حقوق دریافتی مرداد برای خرج‌های این ماه</p>
     ${rows}
     <div class="budget-row">
       <span class="label">جمع اقساط</span>
-      <span class="value">${formatMoney(current.totalExpenses)}</span>
+      <span class="value">${formatMoney(planning.totalExpenses)}</span>
     </div>
     <div class="budget-row highlight">
       <span class="label">💡 بودجه پیشنهادی خرج روزمره</span>
-      <span class="value ${current.available >= 0 ? 'positive' : 'negative'}">${formatMoney(current.available)}</span>
+      <span class="value ${planning.available >= 0 ? 'positive' : 'negative'}">${formatMoney(planning.available)}</span>
     </div>
     <div class="budget-row highlight">
-      <span class="label">📅 بودجه روزانه (تا آخر ماه)</span>
-      <span class="value ${current.available >= 0 ? 'positive' : 'negative'}">${formatMoney(getDailyBudget(current.available))}</span>
+      <span class="label">📅 بودجه روزانه (${monthLabel})</span>
+      <span class="value ${planning.available >= 0 ? 'positive' : 'negative'}">${formatMoney(getDailyBudget(planning.available, planning.year, planning.month))}</span>
     </div>
     <div class="progress-bar-wrap">
       <div class="progress-label">
@@ -228,7 +247,8 @@ function render() {
 
   renderItemList('incomeList', appData.incomes, 'incomes', [
     { key: 'name', type: 'text' },
-    { key: 'amount', type: 'amount' }
+    { key: 'amount', type: 'amount' },
+    { key: 'forMonth', type: 'month' }
   ]);
   renderItemList('fixedExpenseList', appData.fixedExpenses, 'fixedExpenses', [
     { key: 'name', type: 'text' },
@@ -241,17 +261,18 @@ function render() {
   ]);
   renderItemList('oneTimeList', appData.oneTimeExpenses, 'oneTimeExpenses', [
     { key: 'name', type: 'text' },
-    { key: 'amount', type: 'amount' }
+    { key: 'amount', type: 'amount' },
+    { key: 'targetMonth', type: 'month' }
   ]);
 
-  const [cy, cm] = getTodayJalali();
-  const current = calculateMonthBudget(appData, cy, cm);
+  const [py, pm] = getPlanningMonth(appData);
+  const planning = calculateMonthBudget(appData, py, pm);
   const forecast = getForecast(appData, 6);
 
-  renderSummary(current);
-  renderAlert(current);
-  renderForecast(forecast);
-  renderBudgetBreakdown(current);
+  renderSummary(planning);
+  renderAlert(planning);
+  renderForecast(forecast, planning);
+  renderBudgetBreakdown(planning);
 }
 
 render();
