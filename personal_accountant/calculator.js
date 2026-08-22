@@ -144,7 +144,7 @@ function calculateMonthBudget(data, targetYear, targetMonth) {
       name: e.name,
       amount: parseAmount(e.amount),
       type: 'یک‌باره',
-      deductedFromSalary: false
+      deductedFromSalary: isPayrollDeduction(e)
     }));
 
   const allExpenses = [...activeFixed, ...activeTemp, ...activeOneTime];

@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'personal_accountant_data_v3';
+const STORAGE_KEY = 'personal_accountant_data_v4';
 
 const DEFAULT_DATA = {
   planningMonth: { year: 1405, month: 6 },
@@ -17,7 +17,7 @@ const DEFAULT_DATA = {
     { id: 'tmp4', name: 'قسط شرکت', amount: 6500000, endDate: '1405/12/29', deductedFromSalary: false }
   ],
   oneTimeExpenses: [
-    { id: 'ot1', name: 'بدهی اضافی', amount: 18000000, targetMonth: '1405/06' }
+    { id: 'ot1', name: 'بدهی اضافی', amount: 18000000, targetMonth: '1405/06', deductedFromSalary: true }
   ]
 };
 
@@ -58,7 +58,11 @@ function addTempExpense() {
 
 function addOneTimeExpense() {
   const [py, pm] = getPlanningMonth(appData);
-  appData.oneTimeExpenses.push({ id: uid(), name: 'هزینه یک‌باره', amount: 0, targetMonth: `${py}/${String(pm).padStart(2, '0')}` });
+  appData.oneTimeExpenses.push({
+    id: uid(), name: 'هزینه یک‌باره', amount: 0,
+    targetMonth: `${py}/${String(pm).padStart(2, '0')}`,
+    deductedFromSalary: false
+  });
   saveData();
 }
 
@@ -284,7 +288,8 @@ function render() {
   renderItemList('oneTimeList', appData.oneTimeExpenses, 'oneTimeExpenses', [
     { key: 'name', type: 'text' },
     { key: 'amount', type: 'amount' },
-    { key: 'targetMonth', type: 'month' }
+    { key: 'targetMonth', type: 'month' },
+    { key: 'deductedFromSalary', type: 'payroll' }
   ]);
 
   const [py, pm] = getPlanningMonth(appData);
