@@ -1,23 +1,23 @@
-const STORAGE_KEY = 'personal_accountant_data_v5';
+const STORAGE_KEY = 'personal_accountant_data_v7';
 
 const DEFAULT_DATA = {
-  planningMonth: { year: 1405, month: 6 },
+  selectedMonth: { year: 1405, month: 6 },
   incomes: [
     { id: 'inc1', name: 'دریافتی خالص (حقوق مرداد)', amount: 64000000, forMonth: '1405/06' }
   ],
   fixedExpenses: [
-    { id: 'fix1', name: 'دیجی‌پی', amount: 9500000 },
     { id: 'fix2', name: 'اسنپ', amount: 6000000 },
     { id: 'fix3', name: 'وام ملت', amount: 7100000 }
   ],
   tempExpenses: [
+    { id: 'fix1', name: 'دیجی‌پی', amount: 9500000, endDate: '1405/11/19' },
     { id: 'tmp1', name: 'رسالت', amount: 15000000, endDate: '1405/07/29' },
     { id: 'tmp2', name: 'قسط شهریور', amount: 2100000, endDate: '1405/06/05' },
-    { id: 'tmp3', name: 'قسط آذر', amount: 2800000, endDate: '1405/09/10' },
-    { id: 'tmp4', name: 'قسط شرکت', amount: 6500000, endDate: '1405/12/29' }
+    { id: 'tmp3', name: 'قسط آذر', amount: 2800000, endDate: '1405/09/10' }
   ],
   oneTimeExpenses: [
-    { id: 'ot1', name: 'بدهی اضافی', amount: 18000000, targetMonth: '1405/06' }
+    { id: 'ot1', name: 'بدهی اضافی', amount: 18000000, targetMonth: '1405/06' },
+    { id: 'ot2', name: 'قسط شرکت', amount: 6500000, targetMonth: '1405/12' }
   ]
 };
 
@@ -40,9 +40,25 @@ function uid() {
   return 'id_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
 }
 
+function getSelectedMonthRef() {
+  return appData.selectedMonth || { year: 1405, month: 6 };
+}
+
+function selectMonth(year, month) {
+  appData.selectedMonth = { year: parseInt(year, 10), month: parseInt(month, 10) };
+  saveData();
+}
+
+function changeYear(year) {
+  selectMonth(year, getSelectedMonthRef().month);
+}
+
 function addIncome() {
-  const [py, pm] = getPlanningMonth(appData);
-  appData.incomes.push({ id: uid(), name: 'دریافتی', amount: 0, forMonth: `${py}/${String(pm).padStart(2, '0')}` });
+  const { year, month } = getSelectedMonthRef();
+  appData.incomes.push({
+    id: uid(), name: 'دریافتی', amount: 0,
+    forMonth: `${year}/${String(month).padStart(2, '0')}`
+  });
   saveData();
 }
 
@@ -57,8 +73,11 @@ function addTempExpense() {
 }
 
 function addOneTimeExpense() {
-  const [py, pm] = getPlanningMonth(appData);
-  appData.oneTimeExpenses.push({ id: uid(), name: 'هزینه', amount: 0, targetMonth: `${py}/${String(pm).padStart(2, '0')}` });
+  const { year, month } = getSelectedMonthRef();
+  appData.oneTimeExpenses.push({
+    id: uid(), name: 'هزینه', amount: 0,
+    targetMonth: `${year}/${String(month).padStart(2, '0')}`
+  });
   saveData();
 }
 
@@ -101,6 +120,30 @@ function renderItemList(containerId, items, listName, fields) {
     }).join('');
     return `<div class="item-row">${inputs}<button class="btn-delete" onclick="deleteItem('${listName}','${item.id}')">✕</button></div>`;
   }).join('');
+}
+
+function renderMonthPicker() {
+  const { year, month } = getSelectedMonthRef();
+  const years = [1404, 1405, 1406, 1407];
+  const yearOptions = years.map(y =>
+    `<option value="${y}" ${y === year ? 'selected' : ''}>${y}</option>`
+  ).join('');
+
+  const monthButtons = PERSIAN_MONTHS.map((name, i) => {
+    const m = i + 1;
+    const active = m === month ? 'active' : '';
+    return `<button type="button" class="month-btn ${active}" onclick="selectMonth(${year},${m})">${name}</button>`;
+  }).join('');
+
+  document.getElementById('monthPicker').innerHTML = `
+    <div class="month-picker-inner">
+      <label class="year-label">
+        سال
+        <select class="year-select" onchange="changeYear(this.value)">${yearOptions}</select>
+      </label>
+      <div class="month-grid">${monthButtons}</div>
+    </div>
+  `;
 }
 
 function renderSummary(b) {
@@ -155,32 +198,34 @@ function renderActions(b, forecast) {
   ).join('');
 }
 
-function renderForecast(forecast) {
+function renderForecast(forecast, selectedYear) {
   const maxVal = Math.max(...forecast.map(f => f.netReceived), 1);
   document.getElementById('forecastChart').innerHTML = forecast.map(f => {
     const incH = (f.netReceived / maxVal) * 140;
     const expH = (f.totalExpenses / maxVal) * 140;
     const remH = (Math.max(f.remaining, 0) / maxVal) * 140;
-    return `<div class="bar-group">
+    return `<div class="bar-group bar-clickable" onclick="selectMonth(${f.year},${f.month})" title="کلیک برای انتخاب ${f.monthName}">
       <div class="bar-container">
         <div class="bar income-bar" style="height:${incH}px"></div>
         <div class="bar expense-bar" style="height:${expH}px"></div>
         <div class="bar balance-bar" style="height:${remH}px"></div>
       </div>
-      <div class="bar-label">${f.monthName}${f.isPlanningMonth ? ' ★' : ''}</div>
+      <div class="bar-label">${f.monthName}${f.isSelectedMonth ? ' ★' : ''}</div>
     </div>`;
   }).join('');
 
   document.getElementById('forecastBody').innerHTML = forecast.map(f => {
     const st = getBudgetStatus(f.remaining, f.netReceived);
-    return `<tr${f.isPlanningMonth ? ' class="planning-row"' : ''}>
-      <td>${f.monthName}${f.isPlanningMonth ? ' ← الان' : ''}</td>
+    return `<tr class="forecast-row${f.isSelectedMonth ? ' planning-row' : ''}" onclick="selectMonth(${f.year},${f.month})">
+      <td>${f.monthName}${f.isSelectedMonth ? ' ← انتخاب‌شده' : ''}</td>
       <td class="amount">${formatMoney(f.netReceived)}</td>
       <td class="amount">${formatMoney(f.totalExpenses)}</td>
       <td class="amount" ${f.remaining < 0 ? 'style="color:var(--danger)"' : ''}>${formatMoney(f.remaining)}</td>
       <td><span class="status-badge ${st.class}">${st.label}</span></td>
     </tr>`;
   }).join('');
+
+  document.getElementById('forecastTitle').textContent = `📊 کل سال ${selectedYear}`;
 }
 
 function renderBreakdown(b) {
@@ -215,6 +260,8 @@ function renderDate() {
 
 function render() {
   renderDate();
+  renderMonthPicker();
+
   renderItemList('incomeList', appData.incomes, 'incomes', [
     { key: 'name', type: 'text' }, { key: 'amount', type: 'amount' }, { key: 'forMonth', type: 'month' }
   ]);
@@ -228,14 +275,17 @@ function render() {
     { key: 'name', type: 'text' }, { key: 'amount', type: 'amount' }, { key: 'targetMonth', type: 'month' }
   ]);
 
-  const [py, pm] = getPlanningMonth(appData);
-  const budget = calculateMonthBudget(appData, py, pm);
-  const forecast = getForecast(appData, 6);
+  const [sy, sm] = getSelectedMonth(appData);
+  const budget = calculateMonthBudget(appData, sy, sm);
+  const forecast = getYearForecast(appData, sy);
+
+  document.getElementById('budgetTitle').textContent = `🧮 حساب ${budget.monthName} ${budget.year}`;
+
   renderSummary(budget);
   renderAlert(budget);
   renderBreakdown(budget);
   renderActions(budget, forecast);
-  renderForecast(forecast);
+  renderForecast(forecast, sy);
 }
 
 render();

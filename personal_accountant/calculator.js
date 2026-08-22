@@ -101,9 +101,9 @@ function calculateMonthBudget(data, targetYear, targetMonth) {
   const remaining = netReceived - totalExpenses;
 
   const [todayY, todayM] = getTodayJalali();
-  const isPlanningMonth = data.planningMonth
-    && data.planningMonth.year === targetYear
-    && data.planningMonth.month === targetMonth;
+  const isSelectedMonth = data.selectedMonth
+    && data.selectedMonth.year === targetYear
+    && data.selectedMonth.month === targetMonth;
 
   return {
     year: targetYear,
@@ -115,28 +115,25 @@ function calculateMonthBudget(data, targetYear, targetMonth) {
     oneTimeTotal,
     totalExpenses,
     remaining,
-    isPlanningMonth,
+    isSelectedMonth,
     expenseBreakdown
   };
 }
 
-function getPlanningMonth(data) {
+function getSelectedMonth(data) {
+  if (data.selectedMonth) {
+    return [data.selectedMonth.year, data.selectedMonth.month];
+  }
   if (data.planningMonth) {
     return [data.planningMonth.year, data.planningMonth.month];
   }
-  const [y, m] = getTodayJalali();
-  let nm = m + 1, ny = y;
-  if (nm > 12) { nm = 1; ny += 1; }
-  return [ny, nm];
+  return getTodayJalali().slice(0, 2);
 }
 
-function getForecast(data, monthsAhead = 6) {
-  const [startY, startM] = getPlanningMonth(data);
+function getYearForecast(data, year) {
   const forecast = [];
-  for (let i = 0; i < monthsAhead; i++) {
-    let y = startY, m = startM + i;
-    while (m > 12) { m -= 12; y += 1; }
-    forecast.push(calculateMonthBudget(data, y, m));
+  for (let m = 1; m <= 12; m++) {
+    forecast.push(calculateMonthBudget(data, year, m));
   }
   return forecast;
 }
@@ -178,10 +175,13 @@ function getActionAdvice(budget, forecast) {
   tips.push('• مذاکره برای به تأخیر انداختن یک قسط بزرگ (مثلاً رسالت یا بدهی ۱۸M)');
   tips.push('• به تعویق انداختن قسط شرکت (۶.۵M) اگه امکانش هست');
 
-  if (forecast && forecast.length > 1) {
-    const next = forecast[1];
-    if (next.remaining > remaining) {
-      tips.push(`• از ${next.monthName} وضعیت بهتر می‌شه — ${formatMoney(next.remaining)} مانده (${formatMoney(next.remaining - remaining)} بهتر)`);
+  if (forecast && forecast.length) {
+    const idx = forecast.findIndex(f => f.isSelectedMonth);
+    if (idx >= 0 && idx < forecast.length - 1) {
+      const next = forecast[idx + 1];
+      if (next.remaining > remaining) {
+        tips.push(`• از ${next.monthName} بهتر می‌شه — ${formatMoney(next.remaining)} مانده`);
+      }
     }
   }
 
