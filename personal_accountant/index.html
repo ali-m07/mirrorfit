@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>حسابدار شخصی</title>
+  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="header-content">
+        <h1>💰 حسابدار شخصی</h1>
+        <p class="subtitle">مدیریت درآمد، اقساط و بودجه ماهانه</p>
+      </div>
+      <div class="header-date" id="currentDate"></div>
+    </header>
+
+    <section class="summary-cards" id="summaryCards"></section>
+
+    <section class="alert-box" id="alertBox"></section>
+
+    <div class="grid-layout">
+      <section class="panel">
+        <div class="panel-header">
+          <h2>💵 درآمد ماهانه</h2>
+          <button class="btn-icon" onclick="addIncome()" title="افزودن درآمد">+</button>
+        </div>
+        <div id="incomeList" class="item-list"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>📋 اقساط ثابت ماهانه</h2>
+          <button class="btn-icon" onclick="addFixedExpense()" title="افزودن قسط">+</button>
+        </div>
+        <div id="fixedExpenseList" class="item-list"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>⏳ اقساط موقت (با تاریخ پایان)</h2>
+          <button class="btn-icon" onclick="addTempExpense()" title="افزودن قسط موقت">+</button>
+        </div>
+        <div id="tempExpenseList" class="item-list"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>⚡ هزینه‌های یک‌باره این ماه</h2>
+          <button class="btn-icon" onclick="addOneTimeExpense()" title="افزودن هزینه">+</button>
+        </div>
+        <div id="oneTimeList" class="item-list"></div>
+      </section>
+    </div>
+
+    <section class="panel forecast-panel">
+      <div class="panel-header">
+        <h2>📊 پیش‌بینی ۶ ماه آینده</h2>
+      </div>
+      <div class="forecast-chart" id="forecastChart"></div>
+      <div class="forecast-table-wrap">
+        <table class="forecast-table" id="forecastTable">
+          <thead>
+            <tr>
+              <th>ماه</th>
+              <th>درآمد</th>
+              <th>اقساط</th>
+              <th>قابل خرج</th>
+              <th>وضعیت</th>
+            </tr>
+          </thead>
+          <tbody id="forecastBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel budget-panel">
+      <div class="panel-header">
+        <h2>🎯 بودجه پیشنهادی این ماه</h2>
+      </div>
+      <div class="budget-breakdown" id="budgetBreakdown"></div>
+    </section>
+  </div>
+
+  <script src="calculator.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
