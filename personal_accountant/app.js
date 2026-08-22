@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'personal_accountant_data_v7';
+const STORAGE_KEY = 'personal_accountant_data_v8';
 
 const DEFAULT_DATA = {
   selectedMonth: { year: 1405, month: 6 },
@@ -13,11 +13,11 @@ const DEFAULT_DATA = {
     { id: 'fix1', name: 'دیجی‌پی', amount: 9500000, endDate: '1405/11/19' },
     { id: 'tmp1', name: 'رسالت', amount: 15000000, endDate: '1405/07/29' },
     { id: 'tmp2', name: 'قسط شهریور', amount: 2100000, endDate: '1405/06/05' },
-    { id: 'tmp3', name: 'قسط آذر', amount: 2800000, endDate: '1405/09/10' }
+    { id: 'tmp3', name: 'قسط آذر', amount: 2800000, endDate: '1405/09/10' },
+    { id: 'tmp4', name: 'قسط شرکت', amount: 6500000, endDate: '1405/12/29' }
   ],
   oneTimeExpenses: [
-    { id: 'ot1', name: 'بدهی اضافی', amount: 18000000, targetMonth: '1405/06' },
-    { id: 'ot2', name: 'قسط شرکت', amount: 6500000, targetMonth: '1405/12' }
+    { id: 'ot1', name: 'بدهی اضافی', amount: 18000000, targetMonth: '1405/06' }
   ]
 };
 
