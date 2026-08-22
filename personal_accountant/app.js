@@ -12,7 +12,8 @@ const DEFAULT_DATA = {
   tempExpenses: [
     { id: 'tmp1', name: 'رسالت', amount: 15000000, endDate: '1405/07/29' },
     { id: 'tmp2', name: 'قسط شهریور', amount: 2100000, endDate: '1405/06/05' },
-    { id: 'tmp3', name: 'قسط آذر', amount: 2800000, endDate: '1405/09/10' }
+    { id: 'tmp3', name: 'قسط آذر', amount: 2800000, endDate: '1405/09/10' },
+    { id: 'tmp4', name: 'قسط شرکت', amount: 6500000, endDate: '1405/12/29' }
   ],
   oneTimeExpenses: [
     { id: 'ot1', name: 'بدهی اضافی این ماه', amount: 18000000 }
