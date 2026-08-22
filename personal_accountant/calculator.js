@@ -107,21 +107,63 @@ function isTempExpenseActive(expense, targetYear, targetMonth) {
   return true;
 }
 
+function isPayrollDeduction(expense) {
+  return expense.deductedFromSalary !== false;
+}
+
+function getGrossIncome(data, targetYear, targetMonth) {
+  const matched = data.incomes.filter(i => matchesTargetMonth(i, targetYear, targetMonth));
+  if (matched.length) {
+    return matched.reduce((sum, i) => sum + parseAmount(i.amount), 0);
+  }
+  return data.incomes.reduce((sum, i) => sum + parseAmount(i.amount), 0);
+}
+
 function calculateMonthBudget(data, targetYear, targetMonth) {
-  const totalIncome = data.incomes
-    .filter(i => matchesTargetMonth(i, targetYear, targetMonth))
-    .reduce((sum, i) => sum + parseAmount(i.amount), 0);
+  const totalIncome = getGrossIncome(data, targetYear, targetMonth);
 
-  const fixedTotal = data.fixedExpenses.reduce((sum, e) => sum + parseAmount(e.amount), 0);
+  const activeFixed = data.fixedExpenses.map(e => ({
+    name: e.name,
+    amount: parseAmount(e.amount),
+    type: 'ثابت',
+    deductedFromSalary: isPayrollDeduction(e)
+  }));
 
-  const tempTotal = data.tempExpenses
+  const activeTemp = data.tempExpenses
     .filter(e => isTempExpenseActive(e, targetYear, targetMonth))
-    .reduce((sum, e) => sum + parseAmount(e.amount), 0);
+    .map(e => ({
+      name: e.name,
+      amount: parseAmount(e.amount),
+      type: 'موقت',
+      deductedFromSalary: isPayrollDeduction(e)
+    }));
 
   const activeOneTime = data.oneTimeExpenses
-    .filter(e => matchesTargetMonth(e, targetYear, targetMonth));
+    .filter(e => matchesTargetMonth(e, targetYear, targetMonth))
+    .map(e => ({
+      name: e.name,
+      amount: parseAmount(e.amount),
+      type: 'یک‌باره',
+      deductedFromSalary: false
+    }));
 
-  const oneTimeTotal = activeOneTime.reduce((sum, e) => sum + parseAmount(e.amount), 0);
+  const allExpenses = [...activeFixed, ...activeTemp, ...activeOneTime];
+
+  const payrollDeductions = allExpenses
+    .filter(e => e.deductedFromSalary)
+    .reduce((sum, e) => sum + e.amount, 0);
+
+  const shahrivarPayments = allExpenses
+    .filter(e => !e.deductedFromSalary)
+    .reduce((sum, e) => sum + e.amount, 0);
+
+  const fixedTotal = activeFixed.reduce((s, e) => s + e.amount, 0);
+  const tempTotal = activeTemp.reduce((s, e) => s + e.amount, 0);
+  const oneTimeTotal = activeOneTime.reduce((s, e) => s + e.amount, 0);
+  const totalExpenses = fixedTotal + tempTotal + oneTimeTotal;
+
+  const netReceived = totalIncome - payrollDeductions;
+  const available = netReceived - shahrivarPayments;
 
   const [todayY, todayM] = getTodayJalali();
   const isCurrentMonth = targetYear === todayY && targetMonth === todayM;
@@ -129,14 +171,14 @@ function calculateMonthBudget(data, targetYear, targetMonth) {
     && data.planningMonth.year === targetYear
     && data.planningMonth.month === targetMonth;
 
-  const totalExpenses = fixedTotal + tempTotal + oneTimeTotal;
-  const available = totalIncome - totalExpenses;
-
   return {
     year: targetYear,
     month: targetMonth,
     monthName: jalaliMonthName(targetMonth),
     totalIncome,
+    payrollDeductions,
+    netReceived,
+    shahrivarPayments,
     fixedTotal,
     tempTotal,
     oneTimeTotal,
@@ -144,13 +186,12 @@ function calculateMonthBudget(data, targetYear, targetMonth) {
     available,
     isCurrentMonth,
     isPlanningMonth,
-    expenseBreakdown: [
-      ...data.fixedExpenses.map(e => ({ name: e.name, amount: parseAmount(e.amount), type: 'ثابت' })),
-      ...data.tempExpenses
-        .filter(e => isTempExpenseActive(e, targetYear, targetMonth))
-        .map(e => ({ name: e.name, amount: parseAmount(e.amount), type: 'موقت' })),
-      ...activeOneTime.map(e => ({ name: e.name, amount: parseAmount(e.amount), type: 'یک‌باره' }))
-    ]
+    payrollBreakdown: allExpenses.filter(e => e.deductedFromSalary),
+    shahrivarBreakdown: allExpenses.filter(e => !e.deductedFromSalary),
+    expenseBreakdown: allExpenses.map(e => ({
+      ...e,
+      type: e.deductedFromSalary ? `${e.type} · کسر از حقوق` : `${e.type} · خرج ${jalaliMonthName(targetMonth)}`
+    }))
   };
 }
 

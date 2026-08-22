@@ -421,6 +421,59 @@ body {
   transition: width 0.4s ease;
 }
 
+.payroll-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.payroll-toggle input {
+  accent-color: var(--accent);
+}
+
+.flow-section {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--border);
+}
+
+.flow-title {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.budget-row.deduct .value.expense-val {
+  color: var(--expense);
+}
+
+.budget-row.subtotal {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--border);
+  margin-top: 4px;
+}
+
+.budget-row.subtotal .label {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.budget-row.final {
+  margin-top: 8px;
+  font-size: 1.05rem;
+}
+
+.empty-note {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  padding: 8px 0;
+}
+
 .budget-note {
   color: var(--text-muted);
   font-size: 0.9rem;

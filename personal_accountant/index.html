@@ -12,7 +12,7 @@
     <header class="header">
       <div class="header-content">
         <h1>💰 حسابدار شخصی</h1>
-        <p class="subtitle">حقوق مرداد → بودجه شهریور</p>
+        <p class="subtitle">حقوق مرداد (کسر اقساط) → زندگی در شهریور</p>
       </div>
       <div class="header-date" id="currentDate"></div>
     </header>
@@ -32,7 +32,7 @@
 
       <section class="panel">
         <div class="panel-header">
-          <h2>📋 اقساط ثابت ماهانه</h2>
+          <h2>📋 اقساط (کسر از حقوق مرداد)</h2>
           <button class="btn-icon" onclick="addFixedExpense()" title="افزودن قسط">+</button>
         </div>
         <div id="fixedExpenseList" class="item-list"></div>
@@ -48,7 +48,7 @@
 
       <section class="panel">
         <div class="panel-header">
-          <h2>⚡ هزینه‌های یک‌باره (با ماه مقصد)</h2>
+          <h2>⚡ خرج‌های شهریور (از واریزی)</h2>
           <button class="btn-icon" onclick="addOneTimeExpense()" title="افزودن هزینه">+</button>
         </div>
         <div id="oneTimeList" class="item-list"></div>
@@ -65,9 +65,9 @@
           <thead>
             <tr>
               <th>ماه</th>
-              <th>درآمد</th>
-              <th>اقساط</th>
-              <th>قابل خرج</th>
+              <th>واریز خالص</th>
+              <th>خرج ماه</th>
+              <th>برای زندگی</th>
               <th>وضعیت</th>
             </tr>
           </thead>
@@ -78,7 +78,7 @@
 
     <section class="panel budget-panel">
       <div class="panel-header">
-        <h2>🎯 بودجه شهریور (حقوق مرداد)</h2>
+        <h2>🎯 مسیر پول: مرداد → شهریور</h2>
       </div>
       <div class="budget-breakdown" id="budgetBreakdown"></div>
     </section>
