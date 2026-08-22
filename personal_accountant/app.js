@@ -230,11 +230,12 @@ function render() {
 
   const [py, pm] = getPlanningMonth(appData);
   const budget = calculateMonthBudget(appData, py, pm);
+  const forecast = getForecast(appData, 6);
   renderSummary(budget);
   renderAlert(budget);
   renderBreakdown(budget);
-  renderActions(budget);
-  renderForecast(getForecast(appData, 6));
+  renderActions(budget, forecast);
+  renderForecast(forecast);
 }
 
 render();
