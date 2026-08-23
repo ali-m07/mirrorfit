@@ -19,7 +19,7 @@ from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile, W
 from fastapi.responses import StreamingResponse
 
 from src.api.schemas import (
-    ChangeClothRequest, ClothesResponse, ClothingItemSchema, FileResponse,
+    ChangeClothRequest, ClothesResponse, ClothingItemSchema, ClothingUpdate, FileResponse,
     HealthResponse, MessageResponse, ModeRequest, RecordRequest,
     SessionInfo, StartSessionRequest, StatusResponse, StudioRequest,
 )
@@ -130,6 +130,162 @@ async def upload_cloth(request: Request, file: UploadFile = File(...),
     return MessageResponse(ok=True, message="Garment uploaded",
                            data={"cloth": _item_schema(item).model_dump() if item else {}})
 
+@router.patch("/clothes/{cloth_id}", response_model=MessageResponse, tags=["catalog"])
+def update_cloth(
+    cloth_id: str,
+    payload: ClothingUpdate,
+    request: Request,
+) -> MessageResponse:
+    """Update garment metadata and refresh the live catalog."""
+    engine = _engine(request)
+
+    item = engine.catalog.find(cloth_id)
+    if item is None:
+        raise HTTPException(status_code=404, detail="Garment not found")
+
+    if payload.category is not None and payload.category not in {
+        "upper", "dress", "long", "jacket"
+    }:
+        raise HTTPException(
+            status_code=400,
+            detail="Unsupported garment category",
+        )
+
+    catalog_path = engine.catalog.catalog_path
+
+    try:
+        raw = (
+            json.loads(catalog_path.read_text(encoding="utf-8"))
+            if catalog_path.exists()
+            else {"items": []}
+        )
+
+        entries = raw.get("items", []) if isinstance(raw, dict) else raw
+
+        updated = False
+
+        for entry in entries:
+            if (
+                isinstance(entry, dict)
+                and entry.get("filename") == item.filename
+            ):
+                if payload.name is not None:
+                    entry["name"] = payload.name
+
+                if payload.category is not None:
+                    entry["category"] = payload.category
+
+                if payload.description is not None:
+                    entry["description"] = payload.description
+
+                if payload.anchor_top is not None:
+                    entry["anchor_top"] = payload.anchor_top
+
+                if payload.anchor_width is not None:
+                    entry["anchor_width"] = payload.anchor_width
+
+                updated = True
+                break
+
+        if not updated:
+            raise HTTPException(
+                status_code=404,
+                detail="Garment metadata entry not found",
+            )
+
+        catalog_path.write_text(
+            json.dumps(
+                {"items": entries},
+                ensure_ascii=False,
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+
+    except HTTPException:
+        raise
+    except (OSError, json.JSONDecodeError) as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Could not update catalog: {exc}",
+        ) from exc
+
+    engine.catalog.reload()
+
+    updated_item = engine.catalog.find(item.id)
+
+    return MessageResponse(
+        ok=True,
+        message="Garment updated",
+        data={
+            "cloth": (
+                _item_schema(updated_item).model_dump()
+                if updated_item
+                else {}
+            )
+        },
+    )
+
+@router.delete("/clothes/{cloth_id}", response_model=MessageResponse, tags=["catalog"])
+def delete_cloth(
+    cloth_id: str,
+    request: Request,
+) -> MessageResponse:
+    """Remove a garment asset and its catalog metadata."""
+    engine = _engine(request)
+
+    item = engine.catalog.find(cloth_id)
+    if item is None:
+        raise HTTPException(status_code=404, detail="Garment not found")
+
+    catalog_path = engine.catalog.catalog_path
+    target = engine.catalog.directory / item.filename
+
+    try:
+        raw = (
+            json.loads(catalog_path.read_text(encoding="utf-8"))
+            if catalog_path.exists()
+            else {"items": []}
+        )
+
+        entries = raw.get("items", []) if isinstance(raw, dict) else raw
+
+        entries = [
+            entry
+            for entry in entries
+            if not (
+                isinstance(entry, dict)
+                and entry.get("filename") == item.filename
+            )
+        ]
+
+        catalog_path.write_text(
+            json.dumps(
+                {"items": entries},
+                ensure_ascii=False,
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+
+        target.unlink(missing_ok=True)
+
+    except (OSError, json.JSONDecodeError) as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Could not delete garment: {exc}",
+        ) from exc
+
+    engine.catalog.reload()
+
+    return MessageResponse(
+        ok=True,
+        message="Garment deleted",
+        data={
+            "id": item.id,
+            "filename": item.filename,
+        },
+    )
 
 @router.post("/clothes/reload", response_model=MessageResponse, tags=["catalog"])
 def reload_clothes(request: Request) -> MessageResponse:
