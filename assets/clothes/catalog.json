@@ -2,43 +2,51 @@
   "items": [
     {
       "filename": "classic_tee.png",
-      "name": "Classic Tee \u2014 Crimson",
+      "name": "Classic Tee — Crimson",
       "category": "upper",
-      "anchor_top": 0.0,
-      "anchor_width": 1.0,
+      "anchor_top": 0.05,
+      "anchor_width": 1.00,
       "description": "Procedurally generated demo garment (upper)."
     },
     {
       "filename": "navy_hoodie.png",
-      "name": "Everyday Hoodie \u2014 Navy",
+      "name": "Everyday Hoodie — Navy",
       "category": "upper",
-      "anchor_top": 0.0,
-      "anchor_width": 1.0,
+      "anchor_top": 0.11,
+      "anchor_width": 0.95,
       "description": "Procedurally generated demo garment (upper)."
     },
     {
       "filename": "denim_jacket.png",
-      "name": "Trucker Jacket \u2014 Indigo",
+      "name": "Trucker Jacket — Indigo",
       "category": "jacket",
-      "anchor_top": 0.0,
-      "anchor_width": 1.0,
+      "anchor_top": 0.06,
+      "anchor_width": 1.02,
       "description": "Procedurally generated demo garment (jacket)."
     },
     {
       "filename": "summer_dress.png",
-      "name": "Flare Dress \u2014 Coral",
+      "name": "Flare Dress — Coral",
       "category": "dress",
-      "anchor_top": 0.0,
-      "anchor_width": 1.0,
+      "anchor_top": 0.14,
+      "anchor_width": 0.92,
       "description": "Procedurally generated demo garment (dress)."
     },
     {
       "filename": "forest_polo.png",
-      "name": "Pique Polo \u2014 Forest",
+      "name": "Pique Polo — Forest",
       "category": "upper",
-      "anchor_top": 0.0,
-      "anchor_width": 1.0,
+      "anchor_top": 0.04,
+      "anchor_width": 1.00,
       "description": "Procedurally generated demo garment (upper)."
+    },
+    {
+      "filename": "pngtree-white-hoodie-mockup-cutout-png-file-png-image_10159088.png",
+      "name": "Pngtree-White-Hoodie-Mockup-Cutout-Png-File-Png-Image 10159088",
+      "category": "upper",
+      "anchor_top": 0.10,
+      "anchor_width": 0.96,
+      "description": ""
     }
   ]
 }

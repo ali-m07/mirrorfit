@@ -150,7 +150,12 @@ class ClothingCatalog:
         return image
 
     def load_mesh(self, item: ClothingItem):
-        """Load a Wavefront OBJ as ``(vertices, triangular_faces)``."""
+        """Load a Wavefront OBJ as ``(vertices, triangular_faces, normals)``.
+
+        Per-vertex normals are computed from the face topology so the mesh
+        renderer can do real per-vertex lighting instead of relying on a
+        crude depth-based shade.
+        """
         if item.path.suffix.lower() != ".obj":
             raise ValueError(f"Not an OBJ garment: {item.path}")
         vertices, faces = [], []
@@ -166,7 +171,38 @@ class ClothingCatalog:
                         faces.append((idx[0], idx[i], idx[i + 1]))
         if not vertices or not faces:
             raise ValueError(f"OBJ has no renderable geometry: {item.path}")
-        return np.asarray(vertices, dtype=np.float32), faces
+        v = np.asarray(vertices, dtype=np.float32)
+        normals = _compute_vertex_normals(v, faces)
+        return v, faces, normals
+
+    def _mesh_cache_clear(self) -> None:
+        """Drop cached meshes (used by tests; never call in production)."""
+        self._mesh_cache = {}
+
+
+def _compute_vertex_normals(vertices: np.ndarray, faces) -> np.ndarray:
+    """Compute per-vertex normals as the area-weighted average of face normals.
+
+    The returned array has shape ``(N, 3)`` and the same dtype as
+    ``vertices``. Faces that contribute zero area (degenerate) are
+    silently skipped.
+    """
+    n = vertices.shape[0]
+    normals = np.zeros_like(vertices)
+    for a, b, c in faces:
+        v0 = vertices[a]
+        e1 = vertices[b] - v0
+        e2 = vertices[c] - v0
+        # Cross product = face normal * 2x face area. We keep the area
+        # weight so large triangles dominate shared vertices.
+        face_n = np.cross(e1, e2)
+        normals[a] += face_n
+        normals[b] += face_n
+        normals[c] += face_n
+    # Normalise; degenerate vertices (no incident face) stay zero.
+    lengths = np.linalg.norm(normals, axis=1, keepdims=True)
+    lengths = np.where(lengths < 1e-9, 1.0, lengths)
+    return (normals / lengths).astype(np.float32)
 
 
 # ---------------------------------------------------------------------------
