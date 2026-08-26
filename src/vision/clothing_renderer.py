@@ -43,6 +43,7 @@ class GarmentPlacement:
     angle_deg: float
     transform: np.ndarray          # 2x3 affine matrix garment->frame
     shoulder_width_px: float
+    homography: Optional[np.ndarray] = None  # 3x3 perspective matrix (when 4 pts available)
 
 
 class ClothingRenderer:
@@ -115,10 +116,19 @@ class ClothingRenderer:
                 or not np.isfinite(shoulder_w)):
             return None
 
-        # Width from the shoulder span, clamped hard against the frame size
-        # so a bad frame can never blow the garment up into a blob.
+        # Frontal compensation: when the body is rolled sideways the
+        # shoulder span projects to a fraction of its true width. Divide
+        # by frontal_ratio to recover the real span — clamped so a
+        # perfect frontal pose keeps its natural width.
+        frontal = float(pose.frontal_ratio)
+        frontal = max(frontal, 0.55)   # never over-compensate sideways
+        effective_shoulder_w = shoulder_w / frontal
+
+        # Width from the (compensated) shoulder span, clamped hard
+        # against the frame size so a bad frame can never blow the
+        # garment up into a blob.
         anchor_width = item.anchor_width if item else 1.0
-        target_w = shoulder_w * self.config.shoulder_width_factor * anchor_width
+        target_w = effective_shoulder_w * self.config.shoulder_width_factor * anchor_width
         target_w = float(min(target_w, frame_w * 0.85))
 
         # Preserve the asset aspect ratio, but use the observed torso length
@@ -170,12 +180,38 @@ class ClothingRenderer:
         transform[0, 2] += center_x - target_w / 2.0
         transform[1, 2] += center_y - target_h / 2.0
 
+        # --- homography: 4 body points -> 4 garment-box corners -----------
+        # When both shoulders and both hips are confident, a perspective warp
+        # wraps the garment around the torso instead of leaving it pasted on
+        # top like a flat sticker. We map the garment's axis-aligned box
+        # corners (top-left, top-right, bottom-right, bottom-left) to the
+        # four tracked torso landmarks.
+        homography: Optional[np.ndarray] = None
+        try:
+            lhip = pose.point(LM_LEFT_HIP)
+            rhip = pose.point(LM_RIGHT_HIP)
+            if (lhip is not None and rhip is not None
+                    and pose.shoulder_visibility >= self.min_visibility
+                    and pose.hip_visibility >= self.min_visibility):
+                src = np.array([
+                    [0.0,        0.0       ],   # TL of garment box
+                    [target_w,   0.0       ],   # TR
+                    [target_w,   target_h  ],   # BR
+                    [0.0,        target_h  ],   # BL
+                ], dtype=np.float32)
+                dst = np.array([ls, rs, rhip, lhip], dtype=np.float32)
+                # cv2.getPerspectiveTransform wants float32 -> float32
+                homography = cv2.getPerspectiveTransform(src, dst)
+        except cv2.error:
+            homography = None
+
         return GarmentPlacement(
             center=(center_x, center_y),
             size=(int(round(target_w)), int(round(target_h))),
             angle_deg=angle,
             transform=transform,
-            shoulder_width_px=shoulder_w,
+            shoulder_width_px=effective_shoulder_w,
+            homography=homography,
         )
 
     # ------------------------------------------------------------------
@@ -183,12 +219,26 @@ class ClothingRenderer:
     # ------------------------------------------------------------------
 
     def render_mesh(self, frame: np.ndarray, vertices: np.ndarray, faces,
-                    pose: Optional[PoseResult], item: Optional[ClothingItem] = None) -> bool:
+                    pose: Optional[PoseResult], item: Optional[ClothingItem] = None,
+                    body_mask: Optional[np.ndarray] = None,
+                    vertex_normals: Optional[np.ndarray] = None) -> bool:
         """Project a low-poly garment mesh onto the tracked torso.
 
         This is a lightweight CPU renderer for OBJ assets: it preserves mesh
         depth ordering and produces real 3D silhouette geometry without adding
         a heavyweight OpenGL dependency to the desktop app.
+
+        ``body_mask`` is an optional float32 mask in [0, 1] matching the
+        frame. When provided, faces whose centroid lies outside the body
+        are skipped — preventing the mesh from spilling onto the
+        background or onto the face.
+
+        ``vertex_normals`` is an optional (N, 3) array of per-vertex
+        normals in object space. When provided, the screen-space face
+        normal is computed by transforming vertex normals through the
+        same perspective warp applied to positions, then dotting with
+        a virtual light direction for diffuse + specular shading.
+        When ``None``, shading falls back to depth-only.
         """
         if pose is None or not pose.tracked or pose.shoulder_visibility < self.min_visibility:
             return False
@@ -229,13 +279,99 @@ class ClothingRenderer:
             # Small depth contribution gives a convincing volume cue without
             # changing the garment's body anchor.
             depth = (z - (zmin+zmax)/2) * scale_x * 0.06
-            projected.append((int(anchor_x + hx * px + vx * py + hx * depth),
-                              int(anchor_y + hy * px + vy * py + hy * depth), float(z)))
+            projected.append((anchor_x + hx * px + vx * py + hx * depth,
+                              anchor_y + hy * px + vy * py + hy * depth, float(z)))
+
+        # --- perspective wrap for the mesh -----------------------------------
+        # The projected points live in a body-aligned axis frame. When the
+        # four torso landmarks are confident, lift that frame onto the actual
+        # torso trapezoid so the hoodie hugs the body instead of floating on
+        # top as a flat silhouette. Same four-point correspondence as the PNG
+        # homography, applied to vertex coordinates instead of pixels.
+        try:
+            lhip = pose.point(LM_LEFT_HIP)
+            rhip = pose.point(LM_RIGHT_HIP)
+            if (lhip is not None and rhip is not None
+                    and pose.shoulder_visibility >= self.min_visibility
+                    and pose.hip_visibility >= self.min_visibility):
+                src = np.array([
+                    [-target_width / 2,        -target_height / 2     ],   # TL
+                    [ target_width / 2,        -target_height / 2     ],   # TR
+                    [ target_width / 2,         target_height / 2     ],   # BR
+                    [-target_width / 2,         target_height / 2     ],   # BL
+                ], dtype=np.float32)
+                dst = np.array([ls, rs, rhip, lhip], dtype=np.float32)
+                warp = cv2.getPerspectiveTransform(src, dst)
+                # The src points are relative to the anchor (mesh centre), so
+                # subtract it before transforming and add it back after.
+                rel = np.array([[[p[0] - anchor_x, p[1] - anchor_y]
+                                 for p in projected]], dtype=np.float32)
+                warped = cv2.perspectiveTransform(rel, warp)[0]
+                projected = [(float(w[0]), float(w[1]), z)
+                             for w, (_, _, z) in zip(warped, projected)]
+        except cv2.error:
+            pass
+
         for a, b, c in sorted(faces, key=lambda f: sum(projected[i][2] for i in f)):
-            pts = np.array([[projected[i][0], projected[i][1]] for i in (a,b,c)], dtype=np.int32)
+            pts = np.array([[int(round(projected[i][0])), int(round(projected[i][1]))]
+                            for i in (a,b,c)], dtype=np.int32)
+            # Skip faces whose centroid sits outside the body mask. This
+            # keeps the mesh silhouette inside the person's body contour
+            # instead of spilling onto the background or onto the face.
+            if body_mask is not None and frame.shape[:2] == body_mask.shape[:2]:
+                cx = int(np.clip(pts[:, 0].mean(), 0, frame.shape[1] - 1))
+                cy = int(np.clip(pts[:, 1].mean(), 0, frame.shape[0] - 1))
+                if body_mask[cy, cx] < 0.3:
+                    continue
             depth = sum(projected[i][2] for i in (a,b,c)) / 3
-            shade = int(np.clip(135 + 55 * (depth-zmin) / max(zmax-zmin, 1e-6), 80, 210))
-            cv2.fillConvexPoly(frame, pts, (shade//3, shade//2, shade), lineType=cv2.LINE_AA)
+            # Normal-based shading: compute the face normal in OBJECT space
+            # (cross product of two edges in the original 3D mesh). The
+            # projected xy coords are already 2D so a cross product on
+            # them always returns (0, 0, ±1) and produces flat shading.
+            # Object-space normals carry the mesh's actual 3D structure.
+            if vertex_normals is not None:
+                # Average the three vertex normals to get a smooth face
+                # normal — that's the standard Phong shading approach.
+                face_n = (vertex_normals[a] + vertex_normals[b] + vertex_normals[c])
+                face_n_len = float(np.linalg.norm(face_n))
+                if face_n_len < 1e-3:
+                    continue
+                face_n = face_n / face_n_len
+            else:
+                # Fallback: depth-based shade. The mesh is roughly planar
+                # in z so we can use depth alone to fake a bit of volume.
+                shade = int(np.clip(135 + 55 * (depth-zmin) / max(zmax-zmin, 1e-6), 80, 210))
+                cv2.fillConvexPoly(frame, pts, (shade//3, shade//2, shade), lineType=cv2.LINE_AA)
+                continue
+            if face_n_len < 1e-3:
+                continue
+            face_n = face_n / face_n_len
+            # Light direction in OBJECT space — coming from upper-left-front of the
+            # garment so the chest catches light and the right side fades.
+            light_dir = np.array([-0.6, 0.5, 0.7], dtype=np.float32)
+            light_dir /= np.linalg.norm(light_dir)
+            diffuse = float(np.dot(face_n, light_dir))
+            # Wrap diffuse so faces pointing away still catch a tiny
+            # amount of ambient rather than going pitch black.
+            diffuse_w = (diffuse + 1.0) * 0.5   # 0..1
+            # Specular highlight for the brightest ~30% of the diffuse.
+            spec = max(0.0, diffuse_w - 0.65) * 2.5
+            # High-contrast intensity so the 3D shading is obvious.
+            intensity = 0.30 + 0.95 * diffuse_w
+            # Depth modulates the base shade a bit — far parts of the
+            # garment fade slightly so foreground reads as 3D volume.
+            depth_bias = (depth - zmin) / max(zmax - zmin, 1e-6) * 0.08
+            shade = int(np.clip(195 * intensity + 55 * spec + 8 * depth_bias, 50, 245))
+            # Add a thin dark edge between adjacent faces so the polygon
+            # boundaries are visible — sells the 3D illusion even with
+            # a low-poly mesh.
+            cv2.polylines(frame, [pts], isClosed=True,
+                          color=(max(0, shade // 3 - 30),
+                                 max(0, shade // 2 - 30),
+                                 max(0, shade - 30)),
+                          thickness=1, lineType=cv2.LINE_AA)
+            cv2.fillConvexPoly(frame, pts, (shade // 3, shade // 2, shade),
+                                lineType=cv2.LINE_AA)
         return True
 
     def _match_scene_brightness(self, garment: np.ndarray, frame: np.ndarray,
@@ -330,16 +466,211 @@ class ClothingRenderer:
     # ------------------------------------------------------------------
 
     @staticmethod
+    def _apply_body_mask(warped_bgra: np.ndarray,
+                         body_mask: np.ndarray) -> np.ndarray:
+        """Multiply the garment alpha channel by the person mask.
+
+        The garment is RGBA; the person mask is a float32 [0, 1] array of
+        the same height/width. Pixels outside the body get zero alpha so
+        the composite drops them entirely. Pixels inside the body retain
+        their original alpha.
+        """
+        if body_mask is None:
+            return warped_bgra
+        if body_mask.shape[:2] != warped_bgra.shape[:2]:
+            body_mask = cv2.resize(body_mask,
+                                   (warped_bgra.shape[1], warped_bgra.shape[0]),
+                                   interpolation=cv2.INTER_LINEAR)
+        alpha = warped_bgra[:, :, 3].astype(np.float32) / 255.0
+        warped_bgra[:, :, 3] = np.clip(alpha * body_mask, 0.0, 1.0) * 255.0
+        return warped_bgra.astype(np.uint8)
+
+    # ------------------------------------------------------------------
+    # P2: piecewise mesh warping (T-shirt deformation per frame)
+    # ------------------------------------------------------------------
+
+    # Number of control rows/cols in the garment grid. 4 rows covers
+    # collar -> shoulder -> mid -> hem with breathing room; 4 cols lets
+    # the sleeves deform separately from the torso. Kept small (16 quads)
+    # to stay within the 40ms-per-frame real-time budget.
+    _MESH_COLS = 4
+    _MESH_ROWS = 4
+
+    @staticmethod
+    def _build_mesh_grid(gw: int, gh: int, pose: PoseResult,
+                         item: Optional[ClothingItem] = None
+                         ) -> Optional[Tuple[np.ndarray, np.ndarray]]:
+        """Build (src_grid, dst_grid) for piecewise affine warping.
+
+        ``src_grid`` is a (rows+1, cols+1, 2) array of (x, y) coordinates
+        in garment box space; ``dst_grid`` is the same shape but in frame
+        space. Each grid quad is warped independently with cv2.warpAffine
+        so sleeves can deform when the arms move.
+        Returns None when landmarks are too sparse to map.
+        """
+        from src.vision.pose_estimator import (
+            LM_LEFT_SHOULDER, LM_RIGHT_SHOULDER,
+            LM_LEFT_ELBOW,   LM_RIGHT_ELBOW,
+            LM_LEFT_HIP,     LM_RIGHT_HIP,
+        )
+        ls = pose.point(LM_LEFT_SHOULDER)
+        rs = pose.point(LM_RIGHT_SHOULDER)
+        if ls is None or rs is None:
+            return None
+        le = pose.point(LM_LEFT_ELBOW)
+        re = pose.point(LM_RIGHT_ELBOW)
+        lh = pose.point(LM_LEFT_HIP)
+        rh = pose.point(LM_RIGHT_HIP)
+
+        # Anchor top of garment above shoulder midpoint; bottom below hip.
+        mid_x = (ls[0] + rs[0]) / 2.0
+        mid_y = (ls[1] + rs[1]) / 2.0
+        # Default hip projection (no hip landmarks): mirror the shoulder
+        # span downward by the same distance.
+        if lh is None or rh is None:
+            span = max(rs[0] - ls[0], 1.0)
+            lh = (ls[0], ls[1] + span * 2.5)
+            rh = (rs[0], rs[1] + span * 2.5)
+        # Same for elbows: extrapolate downward from shoulders by half
+        # the shoulder->hip distance.
+        if le is None or re is None:
+            lh_y = (lh[1] + rh[1]) / 2.0
+            le = (ls[0] - (ls[0] - lh[0]) * 0.5, (ls[1] + lh_y) * 0.5)
+            re = (rs[0] + (rh[0] - rs[0]) * 0.5, (rs[1] + lh_y) * 0.5)
+
+        cols = ClothingRenderer._MESH_COLS
+        rows = ClothingRenderer._MESH_ROWS
+
+        # dst_grid (rows+1, cols+1, 2): frame-space positions.
+        dst = np.zeros((rows + 1, cols + 1, 2), dtype=np.float32)
+        for r in range(rows + 1):
+            t = r / rows  # 0 = top, 1 = bottom
+            for c in range(cols + 1):
+                s = c / cols  # 0 = left, 1 = right
+                # Interpolate between the four control rows.
+                if t < 0.5:
+                    row_t = t * 2.0  # 0..1 between top row and elbow row
+                    l = (ls[0] + (le[0] - ls[0]) * row_t,
+                         ls[1] + (le[1] - ls[1]) * row_t)
+                    rr = (rs[0] + (re[0] - rs[0]) * row_t,
+                          rs[1] + (re[1] - rs[1]) * row_t)
+                else:
+                    row_t = (t - 0.5) * 2.0  # 0..1 between elbow and hip
+                    l = (le[0] + (lh[0] - le[0]) * row_t,
+                         le[1] + (lh[1] - le[1]) * row_t)
+                    rr = (re[0] + (rh[0] - re[0]) * row_t,
+                          re[1] + (rh[1] - re[1]) * row_t)
+                dst[r, c, 0] = l[0] * (1 - s) + rr[0] * s
+                dst[r, c, 1] = l[1] * (1 - s) + rr[1] * s
+
+        # src_grid in garment UV space: just (col/cols * gw, row/rows * gh).
+        xs = (np.arange(cols + 1) * gw / cols).astype(np.float32)
+        ys = (np.arange(rows + 1) * gh / rows).astype(np.float32)
+        src = np.zeros((rows + 1, cols + 1, 2), dtype=np.float32)
+        src[..., 0] = xs[None, :]
+        src[..., 1] = ys[:, None]
+        return src, dst
+
+    @staticmethod
+    def _warp_piecewise(garment_bgra: np.ndarray,
+                        src_grid: np.ndarray, dst_grid: np.ndarray
+                        ) -> np.ndarray:
+        """Warp ``garment_bgra`` by mapping each grid quad independently.
+
+        For each pair of adjacent grid cells we compute a 2x3 affine
+        transform that takes the source quad to the destination quad,
+        then warpAffine that sub-region. The destination canvas matches
+        the destination grid's bounding box; each quad is processed at
+        its own bounding-box size so the inner OpenCV calls stay small
+        and fast.
+        """
+        gh, gw = garment_bgra.shape[:2]
+        rows = src_grid.shape[0] - 1
+        cols = src_grid.shape[1] - 1
+        xs = dst_grid[..., 0].ravel()
+        ys = dst_grid[..., 1].ravel()
+        out_w = int(round(xs.max() - xs.min() + 2))
+        out_h = int(round(ys.max() - ys.min() + 2))
+        out_w = max(out_w, 1)
+        out_h = max(out_h, 1)
+        canvas = np.zeros((out_h, out_w, 4), dtype=np.uint8)
+        off_x = float(xs.min())
+        off_y = float(ys.min())
+        for r in range(rows):
+            for c in range(cols):
+                src_quad = np.array([
+                    src_grid[r,     c    ],
+                    src_grid[r,     c + 1],
+                    src_grid[r + 1, c + 1],
+                    src_grid[r + 1, c    ],
+                ], dtype=np.float32)
+                dst_quad_full = np.array([
+                    dst_grid[r,     c    ],
+                    dst_grid[r,     c + 1],
+                    dst_grid[r + 1, c + 1],
+                    dst_grid[r + 1, c    ],
+                ], dtype=np.float32)
+                # Compute the destination quad's bounding box so we only
+                # allocate the small sub-canvas needed for this warp.
+                qx_min, qx_max = dst_quad_full[:, 0].min(), dst_quad_full[:, 0].max()
+                qy_min, qy_max = dst_quad_full[:, 1].min(), dst_quad_full[:, 1].max()
+                qw = max(int(round(qx_max - qx_min + 2)), 1)
+                qh = max(int(round(qy_max - qy_min + 2)), 1)
+                dst_quad_rel = dst_quad_full - np.array(
+                    [qx_min, qy_min], dtype=np.float32)
+                M = cv2.getAffineTransform(src_quad[:3], dst_quad_rel[:3])
+                sub = cv2.warpAffine(
+                    garment_bgra, M, (qw, qh),
+                    flags=cv2.INTER_LINEAR,
+                    borderMode=cv2.BORDER_CONSTANT, borderValue=0)
+                # Composite alpha>0 pixels into the master canvas.
+                mask = (sub[:, :, 3] > 0)
+                # Compute the absolute pixel range on the master canvas.
+                ax0 = int(round(qx_min - off_x))
+                ay0 = int(round(qy_min - off_y))
+                ax1 = ax0 + qw
+                ay1 = ay0 + qh
+                # Clip to canvas bounds.
+                cx0 = max(0, ax0)
+                cy0 = max(0, ay0)
+                cx1 = min(out_w, ax1)
+                cy1 = min(out_h, ay1)
+                if cx1 <= cx0 or cy1 <= cy0:
+                    continue
+                sub_cx0 = cx0 - ax0
+                sub_cy0 = cy0 - ay0
+                sub_cx1 = sub_cx0 + (cx1 - cx0)
+                sub_cy1 = sub_cy0 + (cy1 - cy0)
+                mask_clip = mask[sub_cy0:sub_cy1, sub_cx0:sub_cx1]
+                canvas_clip = canvas[cy0:cy1, cx0:cx1]
+                sub_clip = sub[sub_cy0:sub_cy1, sub_cx0:sub_cx1]
+                canvas_clip[mask_clip] = sub_clip[mask_clip]
+        return canvas, off_x, off_y
+
+    @staticmethod
     def _blend_warped(frame: np.ndarray, warped_bgra: np.ndarray) -> None:
         """Premultiplied-style alpha blend of a full-frame BGRA layer."""
         alpha = (warped_bgra[:, :, 3:4].astype(np.float32)) / 255.0
         rgb = warped_bgra[:, :, :3].astype(np.float32)
         frame[:] = (rgb * alpha + frame.astype(np.float32) * (1.0 - alpha)).astype(np.uint8)
 
+    def _blend(self, frame: np.ndarray, warped_bgra: np.ndarray,
+               body_mask: Optional[np.ndarray]) -> None:
+        """Apply body mask (if provided), then alpha-blend onto frame."""
+        warped_bgra = self._apply_body_mask(warped_bgra, body_mask)
+        self._blend_warped(frame, warped_bgra)
+
     def render(self, frame: np.ndarray, garment_bgra: np.ndarray,
                pose: Optional[PoseResult],
-               item: Optional[ClothingItem] = None) -> bool:
-        """Draw the garment onto ``frame`` (in place). Returns True if drawn."""
+               item: Optional[ClothingItem] = None,
+               body_mask: Optional[np.ndarray] = None) -> bool:
+        """Draw the garment onto ``frame`` (in place). Returns True if drawn.
+
+        ``body_mask`` is an optional float32 mask in [0, 1] with the same
+        shape as ``frame`` where 1 marks the person's body. When provided,
+        the garment is clipped against the body so it doesn't bleed onto
+        the background or onto the face.
+        """
         if pose is None or garment_bgra is None or garment_bgra.size == 0:
             return False
 
@@ -361,6 +692,23 @@ class ClothingRenderer:
         # warpAffine on the FULL frame every frame is slow and smears edges;
         # when there is no rotation we can paste the resized garment directly.
         if abs(placement.angle_deg) < 0.5:
+            # Prefer perspective warp when the four torso landmarks are
+            # confident — a flat-axis paste would defeat the homography.
+            if placement.homography is not None:
+                shadow = self._build_shadow(resized)
+                if shadow is not None:
+                    warped_shadow = cv2.warpPerspective(
+                        shadow, placement.homography, (w, h),
+                        flags=cv2.INTER_LINEAR,
+                        borderMode=cv2.BORDER_CONSTANT)
+                    self._blend(frame, warped_shadow, body_mask)
+                warped = cv2.warpPerspective(
+                    resized, placement.homography, (w, h),
+                    flags=cv2.INTER_LINEAR,
+                    borderMode=cv2.BORDER_CONSTANT)
+                self._blend(frame, warped, body_mask)
+                return True
+
             cx, cy = placement.center
             x0 = int(round(cx - gw / 2.0))
             y0 = int(round(cy - gh / 2.0))
@@ -376,11 +724,77 @@ class ClothingRenderer:
             if shadow is not None:
                 shadow_crop = shadow[gy0:gy0 + (fy1 - fy0), gx0:gx0 + (fx1 - fx0)]
                 shadow_roi = frame[fy0:fy1, fx0:fx1]
-                self._blend_warped(shadow_roi, shadow_crop)
+                self._blend(shadow_roi, shadow_crop,
+                            None if body_mask is None else
+                            body_mask[fy0:fy1, fx0:fx1])
             roi = frame[fy0:fy1, fx0:fx1]
+            roi_mask = None if body_mask is None else body_mask[fy0:fy1, fx0:fx1]
+            crop = self._apply_body_mask(crop, roi_mask)
             alpha = (crop[:, :, 3:4].astype(np.float32)) / 255.0
             rgb = crop[:, :, :3].astype(np.float32)
             roi[:] = (rgb * alpha + roi.astype(np.float32) * (1.0 - alpha)).astype(np.uint8)
+            return True
+
+        # --- perspective warp path: homography available -------------------
+        # When the four torso landmarks are confident we have a real 3D-ish
+        # mapping for the garment box -> body trapezoid. Apply that instead
+        # of the affine rotation so the garment wraps the torso instead of
+        # sitting on top like a flat sticker. P2 upgrade: when elbows are
+        # also visible we use piecewise affine so sleeves can deform when
+        # the arms move.
+        if placement.homography is not None and abs(placement.angle_deg) < 1.5:
+            use_piecewise = (pose.point(LM_LEFT_ELBOW) is not None
+                             and pose.point(LM_RIGHT_ELBOW) is not None)
+            if use_piecewise:
+                grids = self._build_mesh_grid(gw, gh, pose, item)
+                if grids is not None:
+                    src_grid, dst_grid = grids
+                    warped, off_x, off_y = self._warp_piecewise(
+                        resized, src_grid, dst_grid)
+                    shadow_piecewise = None
+                    shadow = self._build_shadow(resized)
+                    if shadow is not None:
+                        sp, _, _ = self._warp_piecewise(
+                            shadow, src_grid, dst_grid)
+                        shadow_piecewise = (sp, off_x, off_y)
+                    # Paste the warped garment at (off_x, off_y).
+                    fx0, fy0 = int(off_x), int(off_y)
+                    fw, fh = warped.shape[1], warped.shape[0]
+                    H, W = frame.shape[:2]
+                    fx1, fy1 = min(W, fx0 + fw), min(H, fy0 + fh)
+                    if fx0 < W and fy0 < H and fx1 > fx0 and fy1 > fy0:
+                        # Clip the warped garment to the frame.
+                        g_x0 = max(0, -fx0)
+                        g_y0 = max(0, -fy0)
+                        crop_w = fx1 - max(fx0, 0)
+                        crop_h = fy1 - max(fy0, 0)
+                        clip_x = max(0, fx0)
+                        clip_y = max(fy0, 0)
+                        clipped = warped[g_y0:g_y0 + crop_h, g_x0:g_x0 + crop_w]
+                        roi_mask = (None if body_mask is None
+                                    else body_mask[clip_y:clip_y + crop_h,
+                                                   clip_x:clip_x + crop_w])
+                        if shadow_piecewise is not None:
+                            sp, _, _ = shadow_piecewise
+                            sp_clip = sp[g_y0:g_y0 + crop_h, g_x0:g_x0 + crop_w]
+                            self._blend(frame[clip_y:clip_y + crop_h,
+                                              clip_x:clip_x + crop_w],
+                                        sp_clip, roi_mask)
+                        self._blend(frame[clip_y:clip_y + crop_h,
+                                          clip_x:clip_x + crop_w],
+                                    clipped, roi_mask)
+                        return True
+                # Fall through to perspective warp if piecewise failed.
+            shadow = self._build_shadow(resized)
+            if shadow is not None:
+                warped_shadow = cv2.warpPerspective(shadow, placement.homography, (w, h),
+                                                    flags=cv2.INTER_LINEAR,
+                                                    borderMode=cv2.BORDER_CONSTANT)
+                self._blend(frame, warped_shadow, body_mask)
+            warped = cv2.warpPerspective(resized, placement.homography, (w, h),
+                                          flags=cv2.INTER_LINEAR,
+                                          borderMode=cv2.BORDER_CONSTANT)
+            self._blend(frame, warped, body_mask)
             return True
 
         shadow = self._build_shadow(resized)
@@ -391,10 +805,10 @@ class ClothingRenderer:
             warped_shadow = cv2.warpAffine(shadow, shadow_tf, (w, h),
                                            flags=cv2.INTER_LINEAR,
                                            borderMode=cv2.BORDER_CONSTANT)
-            self._blend_warped(frame, warped_shadow)
+            self._blend(frame, warped_shadow, body_mask)
 
         warped = cv2.warpAffine(resized, placement.transform, (w, h),
                                 flags=cv2.INTER_LINEAR,
                                 borderMode=cv2.BORDER_CONSTANT)
-        self._blend_warped(frame, warped)
+        self._blend(frame, warped, body_mask)
         return True

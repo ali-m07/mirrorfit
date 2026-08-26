@@ -179,12 +179,17 @@ class TryOnEngine:
         pose = self._pose.process(frame) if self._pose else None
         self._last_pose = pose
 
-        # 2. Virtual Studio (background replacement)
+        # 2. Person segmentation (always-on now — used by garment body
+        # mask integration; studio mode additionally uses the same mask
+        # for virtual backgrounds).
+        person_mask: Optional[np.ndarray] = None
+        if self._segmenter is not None and self.enable_vision:
+            person_mask = self._segmenter.process(frame)
+
+        # 2b. Virtual Studio (background replacement) — uses the same mask
         studio_on = bool(state and state.studio_enabled)
-        if studio_on and self._segmenter and self._studio:
-            mask = self._segmenter.process(frame)
-            if mask is not None:
-                frame = self._studio.composite(frame, mask)
+        if studio_on and self._studio and person_mask is not None:
+            frame = self._studio.composite(frame, person_mask)
 
         # 3. Garment rendering
         garment_drawn = False
@@ -192,11 +197,15 @@ class TryOnEngine:
             try:
                 item = self.catalog.get(state.cloth_index)
                 if item.path.suffix.lower() == ".obj":
-                    vertices, faces = self.catalog.load_mesh(item)
-                    garment_drawn = self._renderer.render_mesh(frame, vertices, faces, pose, item)
+                    vertices, faces, normals = self.catalog.load_mesh(item)
+                    garment_drawn = self._renderer.render_mesh(
+                        frame, vertices, faces, pose, item,
+                        body_mask=person_mask, vertex_normals=normals)
                 else:
                     garment = self.catalog.load_image(item)
-                    garment_drawn = self._renderer.render(frame, garment, pose, item)
+                    garment_drawn = self._renderer.render(
+                        frame, garment, pose, item,
+                        body_mask=person_mask)
                 if garment_drawn:
                     state.frames_dressed += 1
             except (FileNotFoundError, ValueError) as exc:
