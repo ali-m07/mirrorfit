@@ -50,17 +50,32 @@ class CameraSection:
 
 
 @dataclass
+class OnnxPoseSection:
+    """Settings for the ONNX Runtime pose backend (GPU via DirectML/CUDA)."""
+
+    model_path: str = "models/rtmo-s.onnx"
+    input_size: int = 640            # square input edge (RTMO exports use 640; auto-matched)
+    device: str = "cpu"              # auto | dml | cpu — cpu is correct everywhere;
+                                     # dml is opt-in (some Intel drivers mis-execute it)
+    person_threshold: float = 0.35   # min person score to accept a detection
+    auto_download: bool = True       # fetch the model on first use when missing
+
+
+@dataclass
 class PoseSection:
     model_complexity: int = 1
     min_detection_confidence: float = 0.5
     min_tracking_confidence: float = 0.5
     smooth_landmarks: bool = True
     enable_segmentation: bool = False
+    backend: str = "auto"            # auto | mediapipe | onnx
+    onnx: OnnxPoseSection = field(default_factory=OnnxPoseSection)
 
 
 @dataclass
 class SegmentationSection:
     model_selection: int = 1
+    interval: int = 3                # recompute the mask every N frames (1 = every frame)
 
 
 @dataclass
@@ -100,6 +115,17 @@ class OcclusionSection:
 
 
 @dataclass
+class WrapSection:
+    """Cylindrical torso wrap: garment texture hugs a virtual torso cylinder."""
+
+    enabled: bool = True
+    strength: float = 0.85        # 0 = flat sticker, 1 = full cylinder
+    max_arc_deg: float = 85.0     # half-arc of the torso covered by garment texture
+    shading: bool = True
+    shading_depth: float = 0.35   # edge darkening strength (0..1)
+
+
+@dataclass
 class RenderingSection:
     shoulder_width_factor: float = 2.25
     neck_offset_factor: float = 0.14
@@ -109,6 +135,7 @@ class RenderingSection:
     shadow: ShadowSection = field(default_factory=ShadowSection)
     lighting: LightingSection = field(default_factory=LightingSection)
     occlusion: OcclusionSection = field(default_factory=OcclusionSection)
+    wrap: WrapSection = field(default_factory=WrapSection)
 
 
 @dataclass

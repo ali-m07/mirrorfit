@@ -6,6 +6,7 @@ Pipeline per frame::
       -> scale to shoulder width / torso length
       -> rotate to match the shoulder-line angle (perspective tilt)
       -> optional scene-brightness matching (lighting)
+      -> optional cylindrical torso wrap + edge shading (torso yaw)
       -> optional drop shadow (same affine transform)
       -> optional forearm occlusion cutout
       -> premultiplied alpha blend onto the frame
@@ -18,7 +19,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 import cv2
 import numpy as np
@@ -65,6 +66,9 @@ class ClothingRenderer:
         self.config = config
         self.min_visibility = min_visibility
         self._angle_state: Optional[float] = None  # EMA of the garment angle
+        # Drop shadows are identical while the garment size barely changes;
+        # bucket sizes to 8 px so EMA jitter still hits the cache.
+        self._shadow_cache: Dict[Tuple[int, int], np.ndarray] = {}
 
     # ------------------------------------------------------------------
     # Placement
@@ -119,10 +123,15 @@ class ClothingRenderer:
         # Frontal compensation: when the body is rolled sideways the
         # shoulder span projects to a fraction of its true width. Divide
         # by frontal_ratio to recover the real span — clamped so a
-        # perfect frontal pose keeps its natural width.
-        frontal = float(pose.frontal_ratio)
-        frontal = max(frontal, 0.55)   # never over-compensate sideways
-        effective_shoulder_w = shoulder_w / frontal
+        # perfect frontal pose keeps its natural width. With the cylindrical
+        # wrap enabled this divide is skipped: the wrap itself narrows the
+        # garment as the user turns, and compensation would cancel that cue.
+        if self.config.wrap.enabled:
+            effective_shoulder_w = shoulder_w
+        else:
+            frontal = float(pose.frontal_ratio)
+            frontal = max(frontal, 0.55)   # never over-compensate sideways
+            effective_shoulder_w = shoulder_w / frontal
 
         # Width from the (compensated) shoulder span, clamped hard
         # against the frame size so a bad frame can never blow the
@@ -398,19 +407,117 @@ class ClothingRenderer:
             return garment
         gain = float(np.clip(scene_luma / garment_luma, 0.75, 1.3))
         out = garment.copy()
-        out[:, :, :3] = np.clip(garment[:, :, :3].astype(np.float32) * gain, 0, 255).astype(np.uint8)
+        # uint8 SIMD path — much cheaper per frame than a float multiply.
+        out[:, :, :3] = cv2.convertScaleAbs(garment[:, :, :3], alpha=gain, beta=0)
+        return out
+
+    def _apply_torso_wrap(self, garment_bgra: np.ndarray, pose: PoseResult,
+                          placement: GarmentPlacement) -> np.ndarray:
+        """Return garment-space BGRA (same shape) with cylindrical wrap + shading."""
+        wrap = self.config.wrap
+        if not wrap.enabled:
+            return garment_bgra
+        gh, gw = garment_bgra.shape[:2]
+        if gw < 8 or gh < 8:
+            return garment_bgra
+        arc = math.radians(wrap.max_arc_deg)
+        if arc <= 0:
+            return garment_bgra
+        psi = math.radians(float(np.clip(pose.torso_yaw_deg, -80.0, 80.0))) * wrap.strength
+        if abs(psi) < math.radians(0.5):
+            return garment_bgra
+
+        # Texture columns parametrise body angles theta_tex in [-arc, +arc].
+        # With the torso yawed by psi the destination columns span the
+        # visible horizon sin(-arc+psi) .. sin(arc+psi): the far side
+        # compresses, and texture past the horizon drops off the edge
+        # (BORDER_REPLICATE clamps it away). cv2.remap maps DEST -> SRC,
+        # which matches this construction.
+        xs = np.linspace(np.sin(-arc + psi), np.sin(arc + psi), gw)
+        theta_cam = np.arcsin(np.clip(xs, -1.0, 1.0))
+        theta_tex = theta_cam - psi
+        src_x = (theta_tex + arc) / (2.0 * arc) * (gw - 1)
+
+        # Blend with the flat mapping so strength=0 is the identity.
+        flat = np.linspace(0.0, gw - 1, gw)
+        src_x_final = flat + wrap.strength * (src_x - flat)
+
+        map_x = np.tile(src_x_final, (gh, 1)).astype(np.float32)
+        map_y = np.tile(np.linspace(0.0, gh - 1, gh)[:, None],
+                        (1, gw)).astype(np.float32)
+        out = cv2.remap(garment_bgra, map_x, map_y, cv2.INTER_LINEAR,
+                        borderMode=cv2.BORDER_REPLICATE)
+
+        # Volume shading: columns approaching the horizon darken as their
+        # surface normal turns away from the camera. Alpha is untouched.
+        if wrap.shading:
+            b = 1.0 - wrap.shading_depth * (1.0 - np.cos(theta_cam))
+            out[:, :, :3] = np.clip(
+                out[:, :, :3].astype(np.float32) * b[None, :, None], 0.0, 255.0
+            ).astype(np.uint8)
         return out
 
     def _build_shadow(self, garment: np.ndarray) -> Optional[np.ndarray]:
-        """Soft drop shadow derived from the garment alpha channel."""
+        """Soft drop shadow derived from the garment alpha channel.
+
+        Shadows only depend on the garment's size, which changes slowly
+        (the pose is EMA-smoothed), so results are cached by 8-px buckets.
+        """
         if not self.config.shadow.enabled:
             return None
+        gh, gw = garment.shape[:2]
+        key = (gw // 8, gh // 8)
+        cached = self._shadow_cache.get(key)
+        if cached is not None:
+            return (cached if cached.shape[:2] == (gh, gw)
+                    else cv2.resize(cached, (gw, gh), interpolation=cv2.INTER_LINEAR))
         alpha = garment[:, :, 3]
         k = max(3, int(self.config.shadow.blur_radius) | 1)
         blurred = cv2.GaussianBlur(alpha, (k, k), 0)
         shadow = np.zeros_like(garment)
         shadow[:, :, 3] = (blurred.astype(np.float32) * self.config.shadow.opacity).astype(np.uint8)
+        if len(self._shadow_cache) > 6:
+            self._shadow_cache.clear()
+        self._shadow_cache[key] = shadow
         return shadow
+
+    def _warp_and_blend(self, frame: np.ndarray, layer: np.ndarray,
+                        matrix: np.ndarray,
+                        body_mask: Optional[np.ndarray]) -> None:
+        """Warp a BGRA layer by a 2x3 (affine) or 3x3 (perspective) matrix,
+        then alpha-blend it — computed only inside the destination ROI.
+
+        Warping and blending the full frame for every layer was the single
+        biggest per-frame cost; clipping to the warped bounding box makes
+        both operations proportional to the garment area instead.
+        """
+        h, w = frame.shape[:2]
+        gh, gw = layer.shape[:2]
+        corners = np.array([[0, 0], [gw, 0], [gw, gh], [0, gh]], dtype=np.float32)
+        if matrix.shape[0] == 3:
+            pts = cv2.perspectiveTransform(
+                corners.reshape(-1, 1, 2), matrix.astype(np.float32)).reshape(-1, 2)
+        else:
+            pts = cv2.transform(
+                corners.reshape(-1, 1, 2), matrix.astype(np.float32)).reshape(-1, 2)
+        x0 = max(int(np.floor(pts[:, 0].min())), 0)
+        y0 = max(int(np.floor(pts[:, 1].min())), 0)
+        x1 = min(int(np.ceil(pts[:, 0].max())) + 1, w)
+        y1 = min(int(np.ceil(pts[:, 1].max())) + 1, h)
+        if x1 <= x0 or y1 <= y0:
+            return
+        shifted = matrix.astype(np.float64).copy()
+        shifted[0, 2] -= x0
+        shifted[1, 2] -= y0
+        size = (x1 - x0, y1 - y0)
+        if matrix.shape[0] == 3:
+            warped = cv2.warpPerspective(layer, shifted, size, flags=cv2.INTER_LINEAR,
+                                         borderMode=cv2.BORDER_CONSTANT)
+        else:
+            warped = cv2.warpAffine(layer, shifted, size, flags=cv2.INTER_LINEAR,
+                                    borderMode=cv2.BORDER_CONSTANT)
+        roi_mask = None if body_mask is None else body_mask[y0:y1, x0:x1]
+        self._blend(frame[y0:y1, x0:x1], warped, roi_mask)
 
     def _apply_arm_occlusion(self, garment: np.ndarray, pose: PoseResult,
                              placement: GarmentPlacement) -> np.ndarray:
@@ -649,10 +756,15 @@ class ClothingRenderer:
 
     @staticmethod
     def _blend_warped(frame: np.ndarray, warped_bgra: np.ndarray) -> None:
-        """Premultiplied-style alpha blend of a full-frame BGRA layer."""
-        alpha = (warped_bgra[:, :, 3:4].astype(np.float32)) / 255.0
-        rgb = warped_bgra[:, :, :3].astype(np.float32)
-        frame[:] = (rgb * alpha + frame.astype(np.float32) * (1.0 - alpha)).astype(np.uint8)
+        """Premultiplied-style alpha blend of a full-frame BGRA layer.
+
+        Fixed-point form ``dst + ((src-dst)*alpha + 127) >> 8`` computed in
+        int32 — SIMD-friendly and max 1/256 rounding, invisible in video.
+        """
+        a = warped_bgra[:, :, 3].astype(np.int32)[:, :, None]
+        src = warped_bgra[:, :, :3].astype(np.int32)
+        dst = frame.astype(np.int32)
+        frame[:] = (dst + ((src - dst) * a + 127 >> 8)).astype(np.uint8)
 
     def _blend(self, frame: np.ndarray, warped_bgra: np.ndarray,
                body_mask: Optional[np.ndarray]) -> None:
@@ -684,6 +796,7 @@ class ClothingRenderer:
 
         resized = cv2.resize(garment_bgra, (gw, gh), interpolation=cv2.INTER_AREA)
         resized = self._match_scene_brightness(resized, frame, placement)
+        resized = self._apply_torso_wrap(resized, pose, placement)
         resized = self._apply_arm_occlusion(resized, pose, placement)
 
         h, w = frame.shape[:2]
@@ -697,16 +810,8 @@ class ClothingRenderer:
             if placement.homography is not None:
                 shadow = self._build_shadow(resized)
                 if shadow is not None:
-                    warped_shadow = cv2.warpPerspective(
-                        shadow, placement.homography, (w, h),
-                        flags=cv2.INTER_LINEAR,
-                        borderMode=cv2.BORDER_CONSTANT)
-                    self._blend(frame, warped_shadow, body_mask)
-                warped = cv2.warpPerspective(
-                    resized, placement.homography, (w, h),
-                    flags=cv2.INTER_LINEAR,
-                    borderMode=cv2.BORDER_CONSTANT)
-                self._blend(frame, warped, body_mask)
+                    self._warp_and_blend(frame, shadow, placement.homography, body_mask)
+                self._warp_and_blend(frame, resized, placement.homography, body_mask)
                 return True
 
             cx, cy = placement.center
@@ -787,14 +892,8 @@ class ClothingRenderer:
                 # Fall through to perspective warp if piecewise failed.
             shadow = self._build_shadow(resized)
             if shadow is not None:
-                warped_shadow = cv2.warpPerspective(shadow, placement.homography, (w, h),
-                                                    flags=cv2.INTER_LINEAR,
-                                                    borderMode=cv2.BORDER_CONSTANT)
-                self._blend(frame, warped_shadow, body_mask)
-            warped = cv2.warpPerspective(resized, placement.homography, (w, h),
-                                          flags=cv2.INTER_LINEAR,
-                                          borderMode=cv2.BORDER_CONSTANT)
-            self._blend(frame, warped, body_mask)
+                self._warp_and_blend(frame, shadow, placement.homography, body_mask)
+            self._warp_and_blend(frame, resized, placement.homography, body_mask)
             return True
 
         shadow = self._build_shadow(resized)
@@ -802,13 +901,7 @@ class ClothingRenderer:
             shadow_tf = placement.transform.copy()
             shadow_tf[0, 2] += self.config.shadow.offset_x
             shadow_tf[1, 2] += self.config.shadow.offset_y
-            warped_shadow = cv2.warpAffine(shadow, shadow_tf, (w, h),
-                                           flags=cv2.INTER_LINEAR,
-                                           borderMode=cv2.BORDER_CONSTANT)
-            self._blend(frame, warped_shadow, body_mask)
+            self._warp_and_blend(frame, shadow, shadow_tf, body_mask)
 
-        warped = cv2.warpAffine(resized, placement.transform, (w, h),
-                                flags=cv2.INTER_LINEAR,
-                                borderMode=cv2.BORDER_CONSTANT)
-        self._blend(frame, warped, body_mask)
+        self._warp_and_blend(frame, resized, placement.transform, body_mask)
         return True

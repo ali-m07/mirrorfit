@@ -122,6 +122,7 @@ class StatusResponse(BaseModel):
     studio_enabled: bool
     mode: str
     tracking: bool
+    pose_backend: Optional[str] = None
     current_cloth: Optional[ClothingItemSchema] = None
     clothes_count: int
     fps: float

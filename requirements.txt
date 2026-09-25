@@ -4,6 +4,16 @@ mediapipe>=0.10.9,<0.10.15  # 0.10.14 = last with legacy `solutions` API (Pose/S
 numpy>=1.24.0,<3
 Pillow>=10.0.0,<12
 
+# GPU pose backend (optional but recommended): ONNX Runtime with DirectML
+# runs the RTMO-s model on any DirectX-12 GPU (Intel/AMD/NVIDIA) and falls
+# back to CPU automatically. Without it, MediaPipe (CPU) is used.
+onnxruntime-directml>=1.17; sys_platform == "win32"
+
+# Garment background removal (optional quality upgrade for uploads):
+#   pip install rembg --no-deps   (reuses the onnxruntime above; never let
+#   pip pull the CPU `onnxruntime` — it would clobber the DirectML build)
+# rembg; sys_platform == "win32"
+
 # Backend API layer
 fastapi>=0.104.0,<0.124
 uvicorn[standard]>=0.24.0,<0.36

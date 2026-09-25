@@ -222,3 +222,44 @@ def test_update_cloth_rejects_invalid_category(catalog_client) -> None:
     )
 
     assert res.status_code == 422
+
+
+# ---------------------------------------------------------------------------
+# Garment upload with automatic processing (any image format)
+# ---------------------------------------------------------------------------
+
+def _jpg_bytes(photo: np.ndarray) -> bytes:
+    ok, buf = cv2.imencode(".jpg", photo)
+    assert ok
+    return buf.tobytes()
+
+
+def test_upload_plain_photo_is_auto_processed(catalog_client) -> None:
+    """A JPEG with NO alpha must be segmented, cropped and cataloged."""
+    photo = np.full((120, 90, 3), 240, dtype=np.uint8)
+    cv2.rectangle(photo, (15, 30), (75, 110), (30, 60, 200), -1)
+
+    res = catalog_client.post(
+        "/clothes/upload",
+        files={"file": ("red tee.jpg", _jpg_bytes(photo), "image/jpeg")},
+        data={"name": "Red Tee", "category": "upper"},
+    )
+
+    assert res.status_code == 200
+    body = res.json()
+    assert body["ok"] is True
+    assert body["data"]["method"] in {"grabcut", "rembg"}
+    cloth = body["data"]["cloth"]
+    assert cloth["id"] == "red-tee"
+    assert cloth["filename"].endswith(".png")
+
+    ids = [i["id"] for i in catalog_client.get("/clothes").json()["items"]]
+    assert "red-tee" in ids
+
+
+def test_upload_rejects_unsupported_type(catalog_client) -> None:
+    res = catalog_client.post(
+        "/clothes/upload",
+        files={"file": ("notes.txt", b"not an image", "text/plain")},
+    )
+    assert res.status_code == 400

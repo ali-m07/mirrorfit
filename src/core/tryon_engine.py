@@ -97,6 +97,19 @@ class TryOnEngine:
         self._toast_text: str = ""
         self._toast_until: float = 0.0
 
+        # Person-mask cache for segmentation interval (see _vision_loop).
+        self._person_mask: Optional[np.ndarray] = None
+        self._mask_age: int = 0
+
+        # Decoupled vision thread: pose + segmentation run asynchronously at
+        # whatever rate the model achieves, while the main loop renders every
+        # camera frame with the most recent result. This keeps the *display*
+        # at camera FPS even when inference is slower (CPU laptops, iGPU).
+        self._vision_lock = threading.Lock()
+        self._vision_slot: Optional[np.ndarray] = None       # newest unprocessed frame
+        self._vision_result: tuple = (None, None)            # (pose, person_mask)
+        self._vision_thread: Optional[threading.Thread] = None
+
         self._fps = FPSCounter()
 
     # ------------------------------------------------------------------
@@ -111,6 +124,7 @@ class TryOnEngine:
             self._camera = WebcamStream(cfg.camera).start()
         if self.enable_vision:
             self._pose = PoseEstimator(cfg.vision)
+            self._pose.warmup()   # select ONNX/DirectML vs MediaPipe (may fetch the model once)
             self._segmenter = PersonSegmenter(cfg.vision.segmentation)
             self._studio = StudioCompositor(cfg.studio)
 
@@ -124,6 +138,10 @@ class TryOnEngine:
         self._sync_default_cloth()
 
         self._stop.clear()
+        if self.enable_vision:
+            self._vision_thread = threading.Thread(
+                target=self._vision_loop, name="tryon-vision", daemon=True)
+            self._vision_thread.start()
         self._thread = threading.Thread(target=self._loop, name="tryon-engine", daemon=True)
         self._thread.start()
         self._running.set()
@@ -132,6 +150,9 @@ class TryOnEngine:
 
     def stop(self) -> None:
         self._stop.set()
+        if self._vision_thread:
+            self._vision_thread.join(timeout=5.0)   # pose graphs can be slow to unwind
+            self._vision_thread = None
         if self._thread:
             self._thread.join(timeout=3.0)
             self._thread = None
@@ -172,21 +193,63 @@ class TryOnEngine:
                 logger.exception("Frame processing failed")
         logger.debug("Engine loop exited")
 
+    # ------------------------------------------------------------------
+    # Vision thread (single owner of the pose / segmentation graphs)
+    # ------------------------------------------------------------------
+
+    def _vision_loop(self) -> None:
+        """Run pose + segmentation on the newest frame, continuously.
+
+        The main loop drops fresh frames into ``_vision_slot``; this thread
+        takes the newest one, infers, and publishes ``(pose, mask)`` under a
+        lock. Because both graphs are driven from this single thread the
+        single-owner rule still holds — the main loop only reads immutable
+        published results.
+        """
+        assert self._pose is not None
+        interval = max(1, int(getattr(
+            self._segmenter.config, "interval", 1))) if self._segmenter else 1
+        while not self._stop.is_set():
+            with self._vision_lock:
+                frame = self._vision_slot
+                self._vision_slot = None
+            if frame is None:
+                time.sleep(0.002)
+                continue
+            try:
+                pose = self._pose.process(frame)
+
+                mask: Optional[np.ndarray] = None
+                if self._segmenter is not None:
+                    self._mask_age += 1
+                    if self._person_mask is None or self._mask_age >= interval:
+                        self._person_mask = self._segmenter.process(frame)
+                        self._mask_age = 0
+                    mask = self._person_mask
+
+                with self._vision_lock:
+                    self._vision_result = (pose, mask)
+            except Exception:  # pragma: no cover - defensive: never kill the loop
+                logger.exception("Vision inference failed")
+
+    def _latest_vision(self) -> tuple:
+        with self._vision_lock:
+            return self._vision_result
+
     def _process_frame(self, frame: np.ndarray) -> None:
         state = self.sessions.current
 
-        # 1. Pose
-        pose = self._pose.process(frame) if self._pose else None
+        if self.enable_vision and self._pose is not None:
+            # Hand the frame to the vision thread and use its latest result.
+            with self._vision_lock:
+                self._vision_slot = frame
+            pose, person_mask = self._latest_vision()
+        else:
+            # Headless / no-vision mode: nothing to infer.
+            pose, person_mask = None, None
         self._last_pose = pose
 
-        # 2. Person segmentation (always-on now — used by garment body
-        # mask integration; studio mode additionally uses the same mask
-        # for virtual backgrounds).
-        person_mask: Optional[np.ndarray] = None
-        if self._segmenter is not None and self.enable_vision:
-            person_mask = self._segmenter.process(frame)
-
-        # 2b. Virtual Studio (background replacement) — uses the same mask
+        # Virtual Studio (background replacement) — uses the published mask.
         studio_on = bool(state and state.studio_enabled)
         if studio_on and self._studio and person_mask is not None:
             frame = self._studio.composite(frame, person_mask)
@@ -463,6 +526,7 @@ class TryOnEngine:
             "tracking": bool(self._last_pose and self._last_pose.tracked
                               and self._last_pose.shoulder_visibility >= self.config.vision.tracking.min_visibility
                               and self._last_garment_drawn),
+            "pose_backend": self._pose.backend_name if self._pose else None,
             "current_cloth": item.to_dict() if item else None,
             "clothes_count": len(self.catalog),
             "fps": round(self._fps.fps, 1),

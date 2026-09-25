@@ -144,6 +144,18 @@ class PoseResult:
             return 1.0
         return float(abs(r[0] - l[0]) / w)
 
+    @property
+    def torso_yaw_deg(self) -> float:
+        """Signed torso yaw estimate in degrees. 0 = frontal. Positive = nose
+        offset to the right of the shoulder midpoint (image coordinates)."""
+        nose = self.point(LM_NOSE)
+        mid = self.shoulder_mid
+        if nose is None or mid is None:
+            return 0.0
+        magnitude = float(np.degrees(np.arccos(np.clip(self.frontal_ratio, 0.35, 1.0))))
+        sign = float(np.sign(nose[0] - mid[0]))
+        return sign * magnitude
+
 
 class _EMAFilter:
     """Per-landmark exponential moving average with visibility-weighted gain."""
@@ -172,15 +184,47 @@ class _EMAFilter:
 
 
 class PoseEstimator:
-    """Single-owner MediaPipe Pose driver."""
+    """Single-owner pose driver: ONNX/DirectML when available, else MediaPipe."""
 
     def __init__(self, config: VisionSection) -> None:
         self.config = config
         self._pose = None
         self._mp = None
+        self._onnx = None
+        self._backend_chosen = False
+        self.backend_name = "mediapipe"
         self._filter = _EMAFilter(config.tracking.smoothing_alpha)
         self._last_good: Optional[PoseResult] = None
         self._missing_frames = 0
+
+    def warmup(self) -> None:
+        """Select and initialise the backend (called from engine.start)."""
+        self._init_backend()
+
+    def _init_backend(self) -> None:
+        """Pick the pose backend once: onnx when requested/available.
+
+        ``backend: "auto"`` tries the ONNX/DirectML GPU path first and falls
+        back to MediaPipe (CPU) when the runtime or model is unavailable.
+        ``backend: "onnx"`` is a hard requirement and raises instead.
+        """
+        if self._backend_chosen:
+            return
+        self._backend_chosen = True
+        choice = str(self.config.pose.backend).lower()
+        if choice in {"onnx", "auto"}:
+            try:
+                from src.vision.pose_backend_onnx import OnnxPoseBackend
+                backend = OnnxPoseBackend(self.config.pose.onnx)
+                backend.ensure_session()
+                self._onnx = backend
+                self.backend_name = backend.backend_name
+                return
+            except Exception as exc:
+                if choice == "onnx":
+                    raise
+                logger.info("ONNX pose backend unavailable (%s) — using MediaPipe", exc)
+        self._init_graph()
 
     def _init_graph(self) -> None:
         """Create the MediaPipe graph on first use (lazy).
@@ -208,32 +252,32 @@ class PoseEstimator:
 
     def process(self, frame_bgr: np.ndarray) -> Optional[PoseResult]:
         """Estimate pose for one BGR frame. Returns None when tracking is lost."""
-        if self._pose is None:
-            self._init_graph()
+        self._init_backend()
+        h, w = frame_bgr.shape[:2]
+
+        if self._onnx is not None:
+            raw = self._onnx.process(frame_bgr)
+            if raw is None:
+                return self._handle_missing()
+            landmarks: Dict[int, Landmark] = {}
+            for idx, (x, y, vis) in raw.items():
+                sx, sy = self._filter.update(idx, x, y, vis)
+                landmarks[idx] = Landmark(x=sx, y=sy, visibility=float(vis))
+            pose = PoseResult(landmarks=landmarks, frame_size=(w, h), tracked=True)
+            self._last_good = pose
+            return pose
+
         if self._pose is None:
             return None
-        h, w = frame_bgr.shape[:2]
         rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
         rgb.flags.writeable = False
         results = self._pose.process(rgb)
 
         if not results.pose_landmarks:
-            self._missing_frames += 1
-            # Graceful degradation: briefly reuse the last good pose so the
-            # garment doesn't pop on/off during a one-frame detection drop.
-            if (self._last_good is not None
-                    and self._missing_frames <= self.config.tracking.max_missing_frames
-                    and (time.monotonic() - self._last_good.timestamp)
-                    <= self.config.tracking.lost_pose_timeout_s):
-                stale = PoseResult(landmarks=self._last_good.landmarks,
-                                   frame_size=self._last_good.frame_size,
-                                   tracked=False)
-                return stale
-            self._filter.clear()
-            return None
+            return self._handle_missing()
 
         self._missing_frames = 0
-        landmarks: Dict[int, Landmark] = {}
+        landmarks = {}
         for idx, lm in enumerate(results.pose_landmarks.landmark):
             sx, sy = self._filter.update(idx, lm.x * w, lm.y * h, lm.visibility)
             landmarks[idx] = Landmark(x=sx, y=sy, visibility=float(lm.visibility))
@@ -242,12 +286,30 @@ class PoseEstimator:
         self._last_good = pose
         return pose
 
+    def _handle_missing(self) -> Optional[PoseResult]:
+        """Graceful degradation when a frame has no usable detection."""
+        self._missing_frames += 1
+        # Briefly reuse the last good pose so the garment doesn't pop on/off
+        # during a one-frame detection drop.
+        if (self._last_good is not None
+                and self._missing_frames <= self.config.tracking.max_missing_frames
+                and (time.monotonic() - self._last_good.timestamp)
+                <= self.config.tracking.lost_pose_timeout_s):
+            return PoseResult(landmarks=self._last_good.landmarks,
+                              frame_size=self._last_good.frame_size,
+                              tracked=False)
+        self._filter.clear()
+        return None
+
     def draw_debug(self, frame_bgr: np.ndarray, pose: PoseResult) -> None:
         """Draw the pose skeleton for debugging (in place)."""
-        if self._mp is None:
-            return
         h, w = pose.frame_size[1], pose.frame_size[0]
-        connections = self._mp.solutions.pose.POSE_CONNECTIONS
+        if self._mp is not None:
+            connections = self._mp.solutions.pose.POSE_CONNECTIONS
+        else:
+            # ONNX backend: minimal COCO subset over the mapped MP indices.
+            connections = [(11, 12), (11, 13), (13, 15), (12, 14), (14, 16),
+                           (11, 23), (12, 24), (23, 24), (11, 12)]
         for a, b in connections:
             pa, pb = pose.point(a), pose.point(b)
             if pa is None or pb is None:
@@ -267,6 +329,9 @@ class PoseEstimator:
         if self._pose is not None:
             self._pose.close()
             self._pose = None
+        if self._onnx is not None:
+            self._onnx.close()
+            self._onnx = None
 
     def __enter__(self) -> "PoseEstimator":
         return self

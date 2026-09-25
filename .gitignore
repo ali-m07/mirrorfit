@@ -24,6 +24,10 @@ output/recordings/*
 !output/screenshots/.gitkeep
 !output/recordings/.gitkeep
 
+# Downloaded model weights / offline wheel cache
+models/
+.wheels/
+
 # OS / editors
 .DS_Store
 Thumbs.db

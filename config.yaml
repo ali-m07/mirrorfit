@@ -23,6 +23,16 @@ camera:
 
 vision:
   pose:
+    backend: "mediapipe"      # mediapipe = fastest on CPU laptops (measured); "onnx" = GPU via
+                              # onnxruntime (CUDA on NVIDIA; DirectML auto-falls-back to CPU
+                              # if the driver misbehaves); "auto" = prefer onnx when installed
+    onnx:
+      model_path: "models/rtmo-s.onnx"   # RTMO-s pose model (Apache-2.0), auto-downloaded
+      input_size: 640                    # matched to the model graph automatically
+      device: "cpu"                      # cpu = always correct | dml = DirectX-12 GPU (opt-in;
+                                         # auto-falls-back to CPU if the driver mis-executes)
+      person_threshold: 0.35
+      auto_download: true
     model_complexity: 1       # 1 = balanced: noticeably better hips/torso than 0, still real-time
     min_detection_confidence: 0.5
     min_tracking_confidence: 0.5
@@ -30,6 +40,7 @@ vision:
     enable_segmentation: false
   segmentation:
     model_selection: 1        # 0 = general, 1 = landscape (better for upper body)
+    interval: 3               # recompute the person mask every N frames (mask reuse between)
   tracking:
     min_visibility: 0.55      # slightly relaxed: keeps fitting alive when arms occlude
     smoothing_alpha: 0.55     # snappier garment follow; angle is smoothed separately in renderer
@@ -54,6 +65,12 @@ rendering:
   occlusion:
     use_arm_cutout: true           # hide garment where forearms cross the chest
     arm_mask_dilation: 7
+  wrap:
+    enabled: true                  # cylindrical torso wrap: texture hugs a virtual torso cylinder
+    strength: 0.85                 # 0 = flat sticker, 1 = full cylinder
+    max_arc_deg: 85                # half-arc of the torso covered by garment texture
+    shading: true                  # volume shading (edge darkening) applied with the wrap
+    shading_depth: 0.35            # edge darkening strength (0..1)
 
 studio:
   enabled: false                # "Virtual Studio" background replacement

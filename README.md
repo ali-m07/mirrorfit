@@ -20,7 +20,8 @@ Built on **OpenCV + MediaPipe + FastAPI**, it runs as a **desktop kiosk app** (r
 
 | Area | What you get |
 |---|---|
-| **Real-time try-on** | Live webcam feed with MediaPipe pose tracking at 25-30+ FPS (720p) |
+| **Real-time try-on** | Decoupled vision/render threads keep the mirror at camera FPS; pluggable pose backend (MediaPipe CPU by default, ONNX RTMO-s with CUDA/DirectML for GPU machines) |
+| **Any garment, instantly** | Upload any product photo (JPG/PNG/WebP, any background) — it is auto-segmented, cropped and fitted live; or use `tools/add_garment.py` |
 | **Accurate garment fit** | Automatic scaling from shoulder width & torso length, rotation from shoulder tilt, per-asset anchor tuning |
 | **Believable compositing** | Transparent-PNG alpha blending, soft drop shadow, scene-brightness matching, forearm occlusion (arms pass *in front of* the garment) |
 | **Temporal smoothing** | EMA landmark filtering + last-good-pose hold: no jitter, no garment popping |
@@ -38,8 +39,10 @@ Built on **OpenCV + MediaPipe + FastAPI**, it runs as a **desktop kiosk app** (r
             │                    TryOnEngine (thread)               │
             │                                                       │
  Webcam ──► │  WebcamStream ─► PoseEstimator ─► ClothingRenderer    │ ──► latest_frame()
- (threaded) │  (grab thread)   (MediaPipe Pose    (affine warp,     │     latest_jpeg()
-            │                  + EMA smoothing)    shadow, occlusion)│
+ (threaded) │  (grab thread)   (ONNX RTMO on GPU   (ROI warp,        │     latest_jpeg()
+            │                  via DirectML, or     shadow cache,    │
+            │                  MediaPipe CPU        occlusion)       │
+            │                  + EMA smoothing)                      │
             │            ┌────► PersonSegmenter ─► StudioCompositor │
             │            │    (Virtual Studio mode)                 │
             └────────────┼──────────────────────────────────────────┘
@@ -70,11 +73,19 @@ ar_virtual_tryon/
 ├── .env.example
 ├── web/index.html              # Zero-dependency web demo (served at /demo)
 ├── tools/generate_sample_clothes.py   # Procedural demo garment generator
+├── tools/add_garment.py        # Any-photo → detect → matte → fit → catalog
+├── tools/fetch_models.py       # Explicit download of the optional ONNX models
+├── tools/benchmark.py          # Per-stage FPS measurement (pick your backend)
+├── models/                     # Auto-downloaded models (rtmo-s, yolos-fashionpedia)
 ├── src/
 │   ├── camera/webcam.py        # Threaded capture
-│   ├── vision/pose_estimator.py       # MediaPipe Pose + EMA smoothing
+│   ├── vision/pose_backend_onnx.py    # RTMO-s ONNX/DirectML GPU backend
+│   ├── vision/pose_estimator.py       # Backend selection + EMA smoothing
+│   ├── vision/garment_detector.py     # YOLOS-FashionPedia object detection (ingest)
 │   ├── vision/segmenter.py            # Selfie segmentation + studio compositing
 │   ├── vision/clothing_renderer.py    # Pose-aligned warp, shadow, occlusion
+│   ├── utils/garment_processor.py     # Detect → matte → crop → silhouette fit
+│   ├── utils/anchor_fit.py            # Shoulder/neckline detection from the mask
 │   ├── core/tryon_engine.py           # Pipeline orchestration (single owner)
 │   ├── core/session_manager.py        # Session lifecycle + analytics
 │   ├── api/routes.py  api/schemas.py  # Versioned REST contracts
@@ -83,6 +94,23 @@ ar_virtual_tryon/
 ├── assets/clothes/             # Transparent garment PNGs + catalog.json
 ├── output/screenshots/  recordings/
 └── tests/                      # Headless test suite (synthetic camera)
+```
+
+## ⚡ Real-time performance & the GPU path
+
+Pose estimation runs through a pluggable backend (`config.yaml → vision.pose.backend`):
+
+- **`mediapipe`** *(default)* — the fastest measured path on CPU-only machines (≈ 48 ms/frame on a 13th-gen Intel i9 laptop → ~20 Hz pose updates).
+- **`onnx`** — the Apache-2.0 **RTMO-s** one-stage pose model via ONNX Runtime. On machines with an NVIDIA GPU install `onnxruntime-gpu` (CUDA execution provider, ≈ 5–10 ms/frame → 100+ Hz). The model file (`models/rtmo-s.onnx`, ~40 MB) auto-downloads on first start.
+  - `device: "dml"` opt-in uses **DirectML** (any DirectX-12 GPU). On some Intel drivers (31.0.101.x) DirectML silently mis-executes this graph — the backend runs a blank-frame sanity check at startup and falls back to CPU automatically, and `device: "cpu"` is always correct.
+- **`auto`** — prefers ONNX when `onnxruntime` is installed, falls back to MediaPipe.
+
+The engine keeps the **display at camera FPS regardless of inference speed**: pose and segmentation run on a dedicated vision thread that continuously consumes the newest frame, while the render loop composites *every* camera frame with the most recent pose (one frame of motion lag, imperceptible in a mirror). Combined with renderer optimisations — garment ROI warping instead of full-frame warps, cached drop shadows, uint8 blending, and a reusable segmentation mask (`vision.segmentation.interval`) — a laptop that could only render ~8 FPS with the old serial pipeline now renders at the camera's full rate.
+
+Measure your own machine:
+
+```bash
+python tools/benchmark.py
 ```
 
 ## 🚀 Getting started
@@ -98,6 +126,7 @@ pip install -r requirements.txt
 ```
 
 > Requires **Python 3.10-3.12** (MediaPipe compatibility) and a webcam.
+> Optional GPU pose: `pip install onnxruntime-gpu` on NVIDIA machines (then set `vision.pose.backend: "onnx"`), or `pip install onnxruntime-directml` for DirectX-12 GPUs — Intel/AMD drivers may fall back to CPU automatically if the sanity check fails.
 
 ### 2. Generate the demo wardrobe
 
@@ -150,6 +179,7 @@ Base URL: `http://localhost:8000` · Interactive OpenAPI docs at **`/docs`**.
 | `GET /health` | Liveness + engine state + uptime |
 | `GET /status` | Live engine snapshot (fps, current garment, mode, recording…) |
 | `GET /clothes` | List the garment catalog |
+| `POST /clothes/upload` | **Any image format** (JPG/PNG/WebP/BMP, background optional) — object detection + matting + silhouette anchor fit, fully automatic |
 | `POST /tryon/start` | Start a try-on session (optional `{"camera_index": 1}`) |
 | `POST /tryon/stop` | Stop the session, returns the session summary |
 | `POST /tryon/change-cloth` | `{"cloth_id": "navy-hoodie"}` or `{"direction": "next"}` |
@@ -171,7 +201,23 @@ Base URL: `http://localhost:8000` · Interactive OpenAPI docs at **`/docs`**.
 
 ## 👕 Preparing clothing assets (important for quality)
 
-The renderer assumes garments are **front-facing product renders** with a transparent background:
+**Fast path — any photo works now, nothing manual.** You no longer need a pre-cut transparent PNG, and you don't type anchors or categories:
+
+```bash
+# CLI: any JPG/PNG/WebP product photo, any background
+python tools/add_garment.py path/to/hoodie.jpg --name "Navy Hoodie"
+```
+
+or drop the photo on the web demo (`/demo → Upload garment photo`) or `POST /clothes/upload`.
+The ingest pipeline is fully detection-driven:
+
+1. **Object detection** — YOLOS-FashionPedia finds the garment and classifies it (shirt / jacket / dress / ...); trousers or skirts are rejected with a clear message (renderer is upper-body).
+2. **Matting** — the background is removed inside the detected region (rembg → GrabCut fallback).
+3. **Anchor fitting** — the shoulder line and neckline are fitted from the garment's own silhouette; the renderer aligns the garment to your tracked shoulders using those anchors.
+
+For detection on a fresh clone, fetch the model once: `python tools/fetch_models.py --only detector` (~123 MB). Without it the pipeline still ingests garments — it just skips auto-categorisation.
+
+**Manual path** (full control) — the renderer assumes garments are **front-facing product renders** with a transparent background:
 
 1. **Format:** PNG with a real alpha channel (RGBA). No JPG.
 2. **Orientation:** perfectly front view, garment straight, **neckline at the top** of the image.
