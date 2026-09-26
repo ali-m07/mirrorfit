@@ -65,6 +65,12 @@ if _web_dir.is_dir():
     def demo_page() -> FileResponse:
         return FileResponse(str(_web_dir / "index.html"))
 
+# Optional browser-based 3D fitting demo built from the locally installed
+# Softwear checkout. The existing Python camera pipeline remains at /demo.
+_softwear_dist = PROJECT_ROOT / "tools" / "vendor" / "softwear" / "dist"
+if _softwear_dist.is_dir():
+    app.mount("/3d", StaticFiles(directory=str(_softwear_dist), html=True), name="three_d_demo")
+
 
 @app.on_event("shutdown")
 def _shutdown() -> None:

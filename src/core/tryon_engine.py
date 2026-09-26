@@ -73,6 +73,7 @@ class TryOnEngine:
         self._segmenter: Optional[PersonSegmenter] = None
         self._studio: Optional[StudioCompositor] = None
         self._renderer = ClothingRenderer(config.rendering, config.vision.tracking.min_visibility)
+        self._base_shoulder_width_factor = config.rendering.shoulder_width_factor
         self._ui = UIOverlay(config.ui)
 
         self._thread: Optional[threading.Thread] = None
@@ -391,7 +392,8 @@ class TryOnEngine:
         if state is not None:
             state.mode = mode
             # Full-body framing: narrower relative garment scale reads better.
-            factor = 2.25 if mode == MODE_UPPER else 1.9
+            factor = (self._base_shoulder_width_factor if mode == MODE_UPPER
+                      else self._base_shoulder_width_factor * 0.85)
             self._renderer.config.shoulder_width_factor = factor
             self._toast(f"Mode: {mode} body")
         return mode

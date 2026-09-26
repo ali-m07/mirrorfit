@@ -1,0 +1,63 @@
+{
+ "fitDebug": {
+  "depth": 1.962,
+  "position": {
+   "x": 0.008,
+   "y": 0.496,
+   "z": 0.543
+  },
+  "scale": 1,
+  "yaw": -0.15,
+  "shoulderSpan": 0.353,
+  "measuredRigSpan": 0.333,
+  "measuredClothWidth": 1.57,
+  "trackedShoulderMid": {
+   "x": 0.5022757691977897,
+   "y": 0.22825483787401507,
+   "w": 0.10822229427851912
+  },
+  "trackedHipsMid": {
+   "x": 0.49782534171644355,
+   "y": 0.5377117954693971
+  },
+  "trackedNose": {
+   "x": 0.44151109250543735,
+   "y": 0.11408979269916317
+  },
+  "garmentBox": {
+   "size": {
+    "x": 1.599,
+    "y": 0.775,
+    "z": 0.543
+   },
+   "center": {
+    "x": 0.004,
+    "y": 0.285,
+    "z": 0.567
+   }
+  }
+ },
+ "garmentFPS": 34,
+ "rects": {
+  "background": {
+   "x": 172,
+   "y": 17,
+   "width": 960,
+   "height": 540,
+   "top": 17,
+   "right": 1132,
+   "bottom": 557,
+   "left": 172
+  },
+  "garment": {
+   "x": 172,
+   "y": 17,
+   "width": 960,
+   "height": 540,
+   "top": 17,
+   "right": 1132,
+   "bottom": 557,
+   "left": 172
+  }
+ }
+}

@@ -21,12 +21,20 @@ env/
 logs/
 output/screenshots/*
 output/recordings/*
+output/server-8000.*.log
 !output/screenshots/.gitkeep
 !output/recordings/.gitkeep
 
 # Downloaded model weights / offline wheel cache
 models/
 .wheels/
+tools/vendor/
+
+# E2E fit-test harness: browser binaries and raw video captures stay local
+tools/e2e/browsers/
+output/e2e/*.y4m
+output/e2e/*.mp4
+output/e2e/*.avi
 
 # OS / editors
 .DS_Store

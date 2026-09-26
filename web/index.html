@@ -61,7 +61,7 @@
 <body>
 <header>
   <h1>AR Virtual Try-On <span class="badge" id="recBadge" style="display:none">● REC</span></h1>
-  <p>Live demo — start a session, then switch garments and capture content.</p>
+  <p>Live demo — start a session, then switch garments and capture content. <a href="/3d/" style="color:#24b2ff">Open 3D fitting demo</a></p>
 </header>
 <main>
   <div class="stage">
@@ -139,9 +139,10 @@ async function refreshClothes() {
 }
 
 async function refreshStatus() {
-  if (!sessionOn) return;
   try {
     const s = await api("/status");
+    if (Boolean(s.running) !== sessionOn) setControls(Boolean(s.running));
+    if (!s.running) return;
     $("stFps").textContent = s.fps ?? "–";
     $("stCloth").textContent = s.current_cloth ? s.current_cloth.name : "–";
     $("stMode").textContent = s.mode;
@@ -149,7 +150,7 @@ async function refreshStatus() {
     recording = s.recording;
     $("recBadge").style.display = recording ? "inline-block" : "none";
     $("recBtn").textContent = recording ? "⏹ Stop Recording" : "⏺ Start Recording";
-  } catch (e) { /* session may have ended */ }
+  } catch (e) { if (sessionOn) setControls(false); }
 }
 
 $("startBtn").onclick = async () => {
@@ -196,6 +197,7 @@ $("modeBtn").onclick = () => {
 
 setInterval(refreshStatus, 2000);
 refreshClothes();
+refreshStatus();
 </script>
 </body>
 </html>

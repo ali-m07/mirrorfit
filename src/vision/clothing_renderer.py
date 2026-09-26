@@ -30,6 +30,7 @@ from src.utils.logger import get_logger
 from src.vision.pose_estimator import (
     PoseResult, LM_LEFT_SHOULDER, LM_RIGHT_SHOULDER, LM_LEFT_ELBOW,
     LM_RIGHT_ELBOW, LM_LEFT_WRIST, LM_RIGHT_WRIST, LM_LEFT_HIP, LM_RIGHT_HIP,
+    LM_NOSE, LM_LEFT_EAR, LM_RIGHT_EAR,
 )
 
 logger = get_logger(__name__)
@@ -169,7 +170,11 @@ class ClothingRenderer:
         neck_lift = max(shoulder_w * self.config.neck_offset_factor,
                         pose.torso_length_px * self._category_neck_factor(category)
                         if pose.torso_length_px > 0 else 0.0)
-        anchor_top = (item.anchor_top if item else 0.0) * target_h
+        # A silhouette's widest upper row can lie deep in an oversized
+        # sleeve. Treating that fraction as an unlimited vertical offset
+        # moves the collar onto the face for close webcam poses.
+        anchor_top = min((item.anchor_top if item else 0.0) * target_h,
+                         shoulder_w * 0.05)
         top_y = mid_y - neck_lift - anchor_top
         center_x = mid_x
         center_y = top_y + target_h / 2.0
@@ -189,12 +194,9 @@ class ClothingRenderer:
         transform[0, 2] += center_x - target_w / 2.0
         transform[1, 2] += center_y - target_h / 2.0
 
-        # --- homography: 4 body points -> 4 garment-box corners -----------
-        # When both shoulders and both hips are confident, a perspective warp
-        # wraps the garment around the torso instead of leaving it pasted on
-        # top like a flat sticker. We map the garment's axis-aligned box
-        # corners (top-left, top-right, bottom-right, bottom-left) to the
-        # four tracked torso landmarks.
+        # Perspective warp retains the fitted garment size. Mapping the image
+        # corners directly to the shoulder/hip landmarks would crush sleeves
+        # into the torso and force every hem to end exactly at the hips.
         homography: Optional[np.ndarray] = None
         try:
             lhip = pose.point(LM_LEFT_HIP)
@@ -208,7 +210,21 @@ class ClothingRenderer:
                     [target_w,   target_h  ],   # BR
                     [0.0,        target_h  ],   # BL
                 ], dtype=np.float32)
-                dst = np.array([ls, rs, rhip, lhip], dtype=np.float32)
+                hip_mid_x = (lhip[0] + rhip[0]) / 2.0
+                hip_mid_y = (lhip[1] + rhip[1]) / 2.0
+                shoulder_mid_x = (ls[0] + rs[0]) / 2.0
+                hip_ratio = float(np.clip(
+                    pose.hip_width_px / shoulder_w, 0.65, 1.25))
+                hem_w = target_w * hip_ratio
+                top_left = (shoulder_mid_x - target_w / 2.0, top_y + ls[1] - mid_y)
+                top_right = (shoulder_mid_x + target_w / 2.0, top_y + rs[1] - mid_y)
+                hem_y = top_y + target_h
+                hip_shift = hip_mid_x - shoulder_mid_x
+                dst = np.array([
+                    top_left, top_right,
+                    (center_x + hip_shift + hem_w / 2.0, hem_y + rhip[1] - hip_mid_y),
+                    (center_x + hip_shift - hem_w / 2.0, hem_y + lhip[1] - hip_mid_y),
+                ], dtype=np.float32)
                 # cv2.getPerspectiveTransform wants float32 -> float32
                 homography = cv2.getPerspectiveTransform(src, dst)
         except cv2.error:
@@ -605,7 +621,8 @@ class ClothingRenderer:
 
     @staticmethod
     def _build_mesh_grid(gw: int, gh: int, pose: PoseResult,
-                         item: Optional[ClothingItem] = None
+                         item: Optional[ClothingItem] = None,
+                         placement: Optional[GarmentPlacement] = None,
                          ) -> Optional[Tuple[np.ndarray, np.ndarray]]:
         """Build (src_grid, dst_grid) for piecewise affine warping.
 
@@ -676,6 +693,26 @@ class ClothingRenderer:
         src = np.zeros((rows + 1, cols + 1, 2), dtype=np.float32)
         src[..., 0] = xs[None, :]
         src[..., 1] = ys[:, None]
+        if placement is not None and placement.homography is not None:
+            # The fitted perspective transform supplies the garment's actual
+            # width and length. Elbow landmarks then bend the sleeve rows,
+            # while the collar and hem remain anchored to the torso.
+            dst = cv2.perspectiveTransform(
+                src.reshape(-1, 1, 2),
+                placement.homography.astype(np.float32)).reshape(src.shape)
+            for shoulder, elbow, col, neighbour in (
+                (ls, le, 0, 1), (rs, re, cols, cols - 1)
+            ):
+                if elbow is None:
+                    continue
+                desired = np.asarray(elbow, dtype=np.float32)
+                baseline = dst[2, col]
+                shift = desired - baseline
+                max_shift = placement.size[0] * 0.25
+                shift = np.clip(shift, -max_shift, max_shift)
+                for row, weight in ((1, 0.65), (2, 0.35)):
+                    dst[row, col] += shift * weight
+                    dst[row, neighbour] += shift * weight * 0.3
         return src, dst
 
     @staticmethod
@@ -790,6 +827,32 @@ class ClothingRenderer:
         if placement is None:
             return False
 
+        # Person segmentation includes the head. Clip the garment at the
+        # neckline even when no segmentation mask is available, so a loose
+        # product cutout cannot be composited over the user's face.
+        ls = pose.point(LM_LEFT_SHOULDER)
+        rs = pose.point(LM_RIGHT_SHOULDER)
+        if ls is not None and rs is not None:
+            neckline = int(min(ls[1], rs[1]) - max(16.0, pose.shoulder_width_px * 0.18))
+            neckline = int(np.clip(neckline, 0, frame.shape[0]))
+            if body_mask is None:
+                body_mask = np.ones(frame.shape[:2], dtype=np.float32)
+            else:
+                body_mask = body_mask.astype(np.float32, copy=True)
+                if body_mask.shape[:2] != frame.shape[:2]:
+                    body_mask = cv2.resize(body_mask, (frame.shape[1], frame.shape[0]))
+            body_mask[:neckline, :] = 0.0
+            nose = pose.point(LM_NOSE)
+            ears = [p for p in (pose.point(LM_LEFT_EAR), pose.point(LM_RIGHT_EAR))
+                    if p is not None]
+            if nose is not None and ears:
+                ear_mid = np.mean(np.asarray(ears, dtype=np.float32), axis=0)
+                head_center = (np.asarray(nose, dtype=np.float32) + ear_mid) / 2.0
+                radius = max(18, int(pose.shoulder_width_px * 0.38))
+                cv2.ellipse(body_mask,
+                            (int(head_center[0]), int(head_center[1])),
+                            (radius, int(radius * 1.18)), 0, 0, 360, 0.0, -1)
+
         gw, gh = placement.size
         if gw < 8 or gh < 8:
             return False
@@ -804,16 +867,7 @@ class ClothingRenderer:
         # --- translate-only fast path (angle ~ 0): direct ROI blending ------
         # warpAffine on the FULL frame every frame is slow and smears edges;
         # when there is no rotation we can paste the resized garment directly.
-        if abs(placement.angle_deg) < 0.5:
-            # Prefer perspective warp when the four torso landmarks are
-            # confident — a flat-axis paste would defeat the homography.
-            if placement.homography is not None:
-                shadow = self._build_shadow(resized)
-                if shadow is not None:
-                    self._warp_and_blend(frame, shadow, placement.homography, body_mask)
-                self._warp_and_blend(frame, resized, placement.homography, body_mask)
-                return True
-
+        if abs(placement.angle_deg) < 0.5 and placement.homography is None:
             cx, cy = placement.center
             x0 = int(round(cx - gw / 2.0))
             y0 = int(round(cy - gh / 2.0))
@@ -847,11 +901,11 @@ class ClothingRenderer:
         # sitting on top like a flat sticker. P2 upgrade: when elbows are
         # also visible we use piecewise affine so sleeves can deform when
         # the arms move.
-        if placement.homography is not None and abs(placement.angle_deg) < 1.5:
+        if placement.homography is not None:
             use_piecewise = (pose.point(LM_LEFT_ELBOW) is not None
                              and pose.point(LM_RIGHT_ELBOW) is not None)
             if use_piecewise:
-                grids = self._build_mesh_grid(gw, gh, pose, item)
+                grids = self._build_mesh_grid(gw, gh, pose, item, placement)
                 if grids is not None:
                     src_grid, dst_grid = grids
                     warped, off_x, off_y = self._warp_piecewise(

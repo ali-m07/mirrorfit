@@ -1,0 +1,1502 @@
+
+===== iter_1_armsdown (2026-09-26 10:22:55) =====
+[info] softWEAR | Build: 26/09/2026, 10:20:09
+[error] A bad HTTP response code (404) was received when fetching the script.
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790405518.269000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790405518.282000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790405518.284000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[harness] page state: {"fitDebug": null, "garmentFPS": 47}
+
+===== iter_1_armsdown (2026-09-26 10:25:53) =====
+[info] softWEAR | Build: 26/09/2026, 10:20:09
+[error] A bad HTTP response code (404) was received when fetching the script.
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790405697.480000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790405697.490000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790405697.491000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[harness] page state: {"fitDebug": null, "garmentFPS": 50}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Inactive
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Excellent
+GFX Render Rate: 50 FPS
+Frame Inference: 20ms
+MediaPipe Tracking Speed:0 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category
+
+===== iter_1_armsdown (2026-09-26 10:32:12) =====
+[info] softWEAR | Build: 26/09/2026, 10:20:09
+[error] A bad HTTP response code (404) was received when fetching the script.
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790406074.724000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790406074.740000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790406074.742000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[harness] page state: {"fitDebug": null, "garmentFPS": 30}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Inactive
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Excellent
+GFX Render Rate: 37 FPS
+Frame Inference: 27ms
+MediaPipe Tracking Speed:0 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category
+
+===== iter_1_armsdown (2026-09-26 11:04:24) =====
+[info] softWEAR | Build: 26/09/2026, 11:01:39
+[error] A bad HTTP response code (404) was received when fetching the script.
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790408021.879000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790408021.896000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790408021.900000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[harness] page state: {"fitDebug": {"depth": 0.728, "position": {"x": -0.069, "y": -0.118, "z": 1.772}, "scale": 1, "yaw": 0, "shoulderSpan": 0.633}, "garmentFPS": 12}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Active
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Poor
+GFX Render Rate: 9 FPS
+Frame Inference: 111ms
+MediaPipe Tracking Speed:7 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category
+
+===== iter_2_armsdown (2026-09-26 11:07:27) =====
+[info] softWEAR | Build: 26/09/2026, 11:01:39
+[error] A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790408203.064000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790408203.076000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790408203.078000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[harness] page state: {"fitDebug": {"depth": 0.727, "position": {"x": -0.064, "y": -0.116, "z": 1.774}, "scale": 1, "yaw": 0, "shoulderSpan": 0.633}, "garmentFPS": 7}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Active
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Poor
+GFX Render Rate: 6 FPS
+Frame Inference: 167ms
+MediaPipe Tracking Speed:5 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category
+
+===== iter_3_armsdown (2026-09-26 11:15:21) =====
+[info] softWEAR | Build: 26/09/2026, 11:12:56
+[error] A bad HTTP response code (404) was received when fetching the script.
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790408677.571000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790408677.612000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790408677.614000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[harness] page state: {"fitDebug": {"depth": 0.744, "position": {"x": -0.07, "y": -0.108, "z": 1.757}, "scale": 1, "yaw": 0, "shoulderSpan": 0.633, "rigSpan": 0.333, "garmentBox": {"size": {"x": 1.57, "y": 0.775, "z": 0.312}, "center": {"x": -0.074, "y": -0.324, "z": 1.787}}}, "garmentFPS": 6}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Active
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Poor
+GFX Render Rate: 7 FPS
+Frame Inference: 143ms
+MediaPipe Tracking Speed:5 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category
+
+===== iter_4_armsdown (2026-09-26 11:27:09) =====
+[info] softWEAR | Build: 26/09/2026, 11:21:25
+[error] A bad HTTP response code (404) was received when fetching the script.
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790409384.180000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790409384.212000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790409384.214000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[harness] page state: {"fitDebug": {"depth": 1.061, "position": {"x": -0.107, "y": -0.166, "z": 1.439}, "scale": 1, "yaw": 0, "shoulderSpan": 0.906, "rigSpan": 0.477, "garmentBox": {"size": {"x": 1.57, "y": 0.775, "z": 0.312}, "center": {"x": -0.107, "y": -0.166, "z": 1.439}}}, "garmentFPS": 7}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Active
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Poor
+GFX Render Rate: 6 FPS
+Frame Inference: 167ms
+MediaPipe Tracking Speed:6 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category
+
+===== iter_5_armsdown (2026-09-26 11:34:05) =====
+[info] softWEAR | Build: 26/09/2026, 11:31:51
+[error] A bad HTTP response code (404) was received when fetching the script.
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790409811.539000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790409811.550000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790409811.550000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[harness] page state: {"fitDebug": {"depth": 1.062, "position": {"x": -0.103, "y": -0.163, "z": 1.438}, "scale": 1, "yaw": 0, "shoulderSpan": 0.906, "rigSpan": 0.477, "garmentBox": {"size": {"x": 1.57, "y": 0.775, "z": 0.312}, "center": {"x": -0.103, "y": -0.116, "z": 1.438}}}, "garmentFPS": 11, "rects": {"background": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}, "garment": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}}}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Active
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Poor
+GFX Render Rate: 10 FPS
+Frame Inference: 100ms
+MediaPipe Tracking Speed:6 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category
+
+===== iter_6_armsdown (2026-09-26 11:36:27) =====
+[info] softWEAR | Build: 26/09/2026, 11:34:50
+[error] A bad HTTP response code (404) was received when fetching the script.
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790409952.821000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790409952.832000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790409952.833000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[harness] page state: {"fitDebug": {"depth": 1.064, "position": {"x": -0.102, "y": -0.159, "z": 1.436}, "scale": 1, "yaw": 0, "shoulderSpan": 0.906, "rigSpan": 0.477, "garmentBox": {"size": {"x": 1.57, "y": 0.775, "z": 0.312}, "center": {"x": -0.102, "y": -0.135, "z": 1.436}}}, "garmentFPS": 10, "rects": {"background": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}, "garment": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}}}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Active
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Poor
+GFX Render Rate: 11 FPS
+Frame Inference: 91ms
+MediaPipe Tracking Speed:7 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category
+
+===== iter_6_armsspread_tpose (2026-09-26 11:37:26) =====
+[info] softWEAR | Build: 26/09/2026, 11:34:50
+[error] A bad HTTP response code (404) was received when fetching the script.
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790409994.734000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790409994.740000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790409994.741000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[harness] T-pose world landmarks injected
+[harness] page state: {"fitDebug": {"depth": 1.156, "position": {"x": -0.121, "y": -0.184, "z": 1.346}, "scale": 1, "yaw": 1, "shoulderSpan": 0.906, "rigSpan": 0.477, "garmentBox": {"size": {"x": 1.11, "y": 0.775, "z": 1.489}, "center": {"x": -0.121, "y": -0.16, "z": 1.346}}}, "garmentFPS": 14, "rects": {"background": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}, "garment": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}}}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Active
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Fair
+GFX Render Rate: 17 FPS
+Frame Inference: 59ms
+MediaPipe Tracking Speed:14 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category
+
+===== iter_6_armsdown_retail (2026-09-26 11:41:46) =====
+[info] softWEAR | Build: 26/09/2026, 11:34:50
+[error] A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[warning] Sound "maleSelected" not found. Did you preload it?
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[harness] retail front image set: C:\Users\Ali\Downloads\mirrorfit\assets/clothes/pngtree-white-hoodie-mockup-cutout-png-file-png-image_10159088.png
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790410269.494000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790410269.509000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790410269.511000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[harness] page state: {"fitDebug": {"depth": 1.049, "position": {"x": -0.099, "y": -0.168, "z": 1.451}, "scale": 1, "yaw": 0, "shoulderSpan": 0.906, "rigSpan": 0.477, "garmentBox": {"size": {"x": 1.57, "y": 0.775, "z": 0.312}, "center": {"x": -0.099, "y": -0.144, "z": 1.451}}}, "garmentFPS": 8, "rects": {"background": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}, "garment": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}}}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Active
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Poor
+GFX Render Rate: 11 FPS
+Frame Inference: 91ms
+MediaPipe Tracking Speed:9 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category
+
+===== iter_7_armsdown (2026-09-26 12:27:14) =====
+[info] softWEAR | Build: 26/09/2026, 12:24:35
+[error] A bad HTTP response code (404) was received when fetching the script.
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790412991.922000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790412991.931000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790412991.932000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[harness] page state: {"fitDebug": null, "garmentFPS": 60, "rects": {"background": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}, "garment": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}}}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Inactive
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Excellent
+GFX Render Rate: 60 FPS
+Frame Inference: 17ms
+MediaPipe Tracking Speed:0 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category
+
+===== iter_7_armsdown (2026-09-26 12:35:20) =====
+[info] softWEAR | Build: 26/09/2026, 12:24:35
+[error] A bad HTTP response code (404) was received when fetching the script.
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790413490.807000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790413490.820000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790413490.822000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[harness] page state: {"fitDebug": {"depth": 2.015, "position": {"x": 0.013, "y": 0.507, "z": 0.486}, "scale": 1, "yaw": -1, "shoulderSpan": 0.366, "measuredRigSpan": 0.333, "measuredClothWidth": 1.177, "trackedShoulderMid": {"x": 0.504002683665095, "y": 0.22983640602649213, "w": 0.10957088542404275}, "trackedHipsMid": {"x": 0.4998999758237104, "y": 0.5343614369587715}, "garmentBox": {"size": {"x": 1.11, "y": 0.775, "z": 1.489}, "center": {"x": 0.013, "y": 0.517, "z": 0.486}}}, "garmentFPS": 9, "rects": {"background": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}, "garment": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}}}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Active
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Poor
+GFX Render Rate: 11 FPS
+Frame Inference: 91ms
+MediaPipe Tracking Speed:8 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category
+
+===== iter_7_armsdown (2026-09-26 12:43:12) =====
+[error] A bad HTTP response code (404) was received when fetching the script.
+[info] softWEAR | Build: 26/09/2026, 12:38:20
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790413953.953000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790413953.982000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790413953.985000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[harness] page state: {"fitDebug": {"depth": 2.025, "position": {"x": 0.009, "y": 0.512, "z": 0.478}, "scale": 1, "yaw": -0.3, "shoulderSpan": 0.366, "measuredRigSpan": 0.333, "measuredClothWidth": 1.177, "trackedShoulderMid": {"x": 0.502566280857341, "y": 0.2286291794355277, "w": 0.10892288240389135}, "trackedHipsMid": {"x": 0.49783683410997487, "y": 0.538030479144788}, "garmentBox": {"size": {"x": 1.592, "y": 0.775, "z": 0.762}, "center": {"x": 0.009, "y": 0.522, "z": 0.478}}}, "garmentFPS": 9, "rects": {"background": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}, "garment": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}}}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Active
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Poor
+GFX Render Rate: 9 FPS
+Frame Inference: 111ms
+MediaPipe Tracking Speed:6 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category
+
+===== iter_7_armsdown (2026-09-26 12:46:33) =====
+[info] softWEAR | Build: 26/09/2026, 12:38:20
+[error] A bad HTTP response code (404) was received when fetching the script.
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790414161.259000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790414161.268000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790414161.271000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[harness] page state: {"fitDebug": {"depth": 2.012, "position": {"x": 0.013, "y": 0.507, "z": 0.49}, "scale": 1, "yaw": -0.3, "shoulderSpan": 0.366, "measuredRigSpan": 0.333, "measuredClothWidth": 1.177, "trackedShoulderMid": {"x": 0.5039215974305871, "y": 0.22977707175761042, "w": 0.10963587479188472}, "trackedHipsMid": {"x": 0.49985716848271033, "y": 0.5342975551460514}, "garmentBox": {"size": {"x": 1.592, "y": 0.775, "z": 0.762}, "center": {"x": 0.013, "y": 0.517, "z": 0.49}}}, "garmentFPS": 12, "rects": {"background": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}, "garment": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}}}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Active
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Poor
+GFX Render Rate: 10 FPS
+Frame Inference: 100ms
+MediaPipe Tracking Speed:9 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category
+
+===== iter_8_armsdown (2026-09-26 12:57:23) =====
+[info] softWEAR | Build: 26/09/2026, 12:54:11
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] A bad HTTP response code (404) was received when fetching the script.
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790414799.320000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790414799.341000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790414799.344000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[harness] page state: {"fitDebug": {"depth": 1.999, "position": {"x": 0.01, "y": 0.504, "z": 0.502}, "scale": 1, "yaw": -0.15, "shoulderSpan": 0.366, "measuredRigSpan": 0.333, "measuredClothWidth": 1.57, "trackedShoulderMid": {"x": 0.503039726150901, "y": 0.22967830128863598, "w": 0.11038663876002913}, "trackedHipsMid": {"x": 0.4992676640570441, "y": 0.5351381917949976}, "trackedNose": {"x": 0.441133339890488, "y": 0.1136520979183347}, "garmentBox": {"size": {"x": 1.599, "y": 0.775, "z": 0.543}, "center": {"x": 0.006, "y": 0.123, "z": 0.526}}}, "garmentFPS": 7, "rects": {"background": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}, "garment": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}}}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Active
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Poor
+GFX Render Rate: 8 FPS
+Frame Inference: 125ms
+MediaPipe Tracking Speed:5 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category
+
+===== iter_8_armsdown (2026-09-26 13:02:29) =====
+[error] A bad HTTP response code (404) was received when fetching the script.
+[info] softWEAR | Build: 26/09/2026, 12:58:50
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790415100.590000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790415100.619000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790415100.622000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[harness] page state: {"fitDebug": {"depth": 2.048, "position": {"x": 0.007, "y": 0.518, "z": 0.455}, "scale": 1, "yaw": -0.15, "shoulderSpan": 0.366, "measuredRigSpan": 0.333, "measuredClothWidth": 1.57, "trackedShoulderMid": {"x": 0.502157121802856, "y": 0.22803198020902857, "w": 0.10768421740721645}, "trackedHipsMid": {"x": 0.4980120671706375, "y": 0.5374954237932468}, "trackedNose": {"x": 0.4412172257821573, "y": 0.11375939039877048}, "garmentBox": {"size": {"x": 1.599, "y": 0.775, "z": 0.543}, "center": {"x": 0.004, "y": 0.238, "z": 0.48}}}, "garmentFPS": 7, "rects": {"background": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}, "garment": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}}}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Active
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Poor
+GFX Render Rate: 7 FPS
+Frame Inference: 143ms
+MediaPipe Tracking Speed:7 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category
+
+===== iter_8_armsspread_tpose (2026-09-26 13:04:19) =====
+[info] softWEAR | Build: 26/09/2026, 12:58:50
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] A bad HTTP response code (404) was received when fetching the script.
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790415205.934000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790415205.955000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790415205.957000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[harness] T-pose world landmarks injected
+[harness] page state: {"fitDebug": {"depth": 2.044, "position": {"x": 0.005, "y": 0.522, "z": 0.455}, "scale": 1, "yaw": 0.15, "shoulderSpan": 0.366, "measuredRigSpan": 0.333, "measuredClothWidth": 1.57, "trackedShoulderMid": {"x": 0.5014127366241047, "y": 0.22628392180650156, "w": 0.10808606356692961}, "trackedHipsMid": {"x": 0.4984845053865317, "y": 0.5364012738528521}, "trackedNose": {"x": 0.44122502676244285, "y": 0.11119807552594718}, "garmentBox": {"size": {"x": 1.599, "y": 0.775, "z": 0.543}, "center": {"x": 0.008, "y": 0.241, "z": 0.48}}}, "garmentFPS": 7, "rects": {"background": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}, "garment": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}}}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Active
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Poor
+GFX Render Rate: 7 FPS
+Frame Inference: 143ms
+MediaPipe Tracking Speed:6 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category
+
+===== iter_8_armsdown_retail (2026-09-26 13:19:08) =====
+[error] A bad HTTP response code (404) was received when fetching the script.
+[info] softWEAR | Build: 26/09/2026, 12:58:50
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[harness] retail front image set: C:\Users\Ali\Downloads\mirrorfit\tools\e2e\assets\solid_green_product.png
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790416105.604000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790416105.627000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790416105.630000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[harness] page state: {"fitDebug": {"depth": 1.986, "position": {"x": 0.012, "y": 0.501, "z": 0.519}, "scale": 1, "yaw": -0.15, "shoulderSpan": 0.366, "measuredRigSpan": 0.333, "measuredClothWidth": 1.57, "trackedShoulderMid": {"x": 0.5036130489766615, "y": 0.2286436848365165, "w": 0.11077969776315819}, "trackedHipsMid": {"x": 0.4983764503607937, "y": 0.536474513427025}, "trackedNose": {"x": 0.4422392775684006, "y": 0.11556269330933366}, "garmentBox": {"size": {"x": 1.599, "y": 0.775, "z": 0.543}, "center": {"x": 0.008, "y": 0.221, "z": 0.544}}}, "garmentFPS": 7, "rects": {"background": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}, "garment": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}}}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Active
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Poor
+GFX Render Rate: 5 FPS
+Frame Inference: 200ms
+MediaPipe Tracking Speed:3 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category
+
+===== iter_8_armsdown_retail (2026-09-26 13:28:30) =====
+[error] A bad HTTP response code (404) was received when fetching the script.
+[info] softWEAR | Build: 26/09/2026, 12:58:50
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[harness] retail front image set: C:\Users\Ali\Downloads\mirrorfit\tools\e2e\assets\solid_green_product.png
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790416665.408000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790416665.433000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790416665.435000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[harness] page state: {"fitDebug": {"depth": 2.008, "position": {"x": 0.01, "y": 0.506, "z": 0.493}, "scale": 1, "yaw": -0.15, "shoulderSpan": 0.366, "measuredRigSpan": 0.333, "measuredClothWidth": 1.57, "trackedShoulderMid": {"x": 0.503131030430832, "y": 0.22968369417336218, "w": 0.10996319458932684}, "trackedHipsMid": {"x": 0.49925083339365117, "y": 0.5351037521207995}, "trackedNose": {"x": 0.44124187707932183, "y": 0.11393350457317777}, "garmentBox": {"size": {"x": 1.599, "y": 0.775, "z": 0.543}, "center": {"x": 0.007, "y": 0.225, "z": 0.517}}}, "garmentFPS": 6, "rects": {"background": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}, "garment": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}}}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Active
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Poor
+GFX Render Rate: 5 FPS
+Frame Inference: 200ms
+MediaPipe Tracking Speed:2 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category
+
+===== iter_9_armsdown (2026-09-26 13:29:45) =====
+[info] softWEAR | Build: 26/09/2026, 12:58:50
+[error] A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790416745.339000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790416745.350000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790416745.351000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[harness] page state: {"fitDebug": {"depth": 1.998, "position": {"x": 0.011, "y": 0.504, "z": 0.5}, "scale": 1, "yaw": -0.15, "shoulderSpan": 0.366, "measuredRigSpan": 0.333, "measuredClothWidth": 1.57, "trackedShoulderMid": {"x": 0.5032410005046064, "y": 0.22958422002941792, "w": 0.11065912176642177}, "trackedHipsMid": {"x": 0.4994614250746696, "y": 0.5347599927594318}, "trackedNose": {"x": 0.44129139177516974, "y": 0.11404203031524596}, "garmentBox": {"size": {"x": 1.599, "y": 0.775, "z": 0.543}, "center": {"x": 0.007, "y": 0.224, "z": 0.524}}}, "garmentFPS": 10, "rects": {"background": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}, "garment": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}}}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Active
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Poor
+GFX Render Rate: 8 FPS
+Frame Inference: 125ms
+MediaPipe Tracking Speed:5 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category
+
+===== iter_9_armsspread_tpose (2026-09-26 13:31:33) =====
+[info] softWEAR | Build: 26/09/2026, 12:58:50
+[error] A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790416834.412000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790416834.424000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790416834.425000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[harness] T-pose world landmarks injected
+[harness] page state: {"fitDebug": {"depth": 2.046, "position": {"x": 0.005, "y": 0.522, "z": 0.454}, "scale": 1, "yaw": 0.15, "shoulderSpan": 0.366, "measuredRigSpan": 0.333, "measuredClothWidth": 1.57, "trackedShoulderMid": {"x": 0.5014124818492582, "y": 0.22623274461442794, "w": 0.10797733874900647}, "trackedHipsMid": {"x": 0.4984479105441141, "y": 0.5363778071911526}, "trackedNose": {"x": 0.44128678616236117, "y": 0.11136506353414571}, "garmentBox": {"size": {"x": 1.599, "y": 0.775, "z": 0.543}, "center": {"x": 0.008, "y": 0.242, "z": 0.479}}}, "garmentFPS": 31, "rects": {"background": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}, "garment": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}}}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Active
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Poor
+GFX Render Rate: 6 FPS
+Frame Inference: 167ms
+MediaPipe Tracking Speed:5 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category
+
+===== iter_9_armsdown_retail (2026-09-26 13:33:22) =====
+[error] A bad HTTP response code (404) was received when fetching the script.
+[info] softWEAR | Build: 26/09/2026, 12:58:50
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[harness] retail front image set: C:\Users\Ali\Downloads\mirrorfit\tools\e2e\assets\solid_green_product.png
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790416956.309000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790416956.351000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790416956.353000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[harness] page state: {"fitDebug": {"depth": 2.011, "position": {"x": 0.013, "y": 0.507, "z": 0.489}, "scale": 1, "yaw": -0.15, "shoulderSpan": 0.366, "measuredRigSpan": 0.333, "measuredClothWidth": 1.57, "trackedShoulderMid": {"x": 0.5037843798602487, "y": 0.22987318835895526, "w": 0.1098637293846392}, "trackedHipsMid": {"x": 0.4999372854428643, "y": 0.5344597424595499}, "trackedNose": {"x": 0.44277949989325804, "y": 0.11557595912136365}, "garmentBox": {"size": {"x": 1.599, "y": 0.775, "z": 0.543}, "center": {"x": 0.009, "y": 0.226, "z": 0.514}}}, "garmentFPS": 12, "rects": {"background": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}, "garment": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}}}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Active
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Poor
+GFX Render Rate: 9 FPS
+Frame Inference: 111ms
+MediaPipe Tracking Speed:6 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category
+
+===== iter_10_armsdown (2026-09-26 15:20:16) =====
+[info] softWEAR | Build: 26/09/2026, 15:16:54
+[error] A bad HTTP response code (404) was received when fetching the script.
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790423371.497000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790423371.514000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790423371.515000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[harness] page state: {"fitDebug": {"depth": 2.024, "position": {"x": 0.009, "y": 0.511, "z": 0.481}, "scale": 1, "yaw": -0.15, "shoulderSpan": 0.366, "measuredRigSpan": 0.333, "measuredClothWidth": 1.57, "trackedShoulderMid": {"x": 0.5025424071655962, "y": 0.22859685230527804, "w": 0.10888404460500514}, "trackedHipsMid": {"x": 0.4977643266728471, "y": 0.5380076690659215}, "trackedNose": {"x": 0.44154868650874907, "y": 0.11460264995239285}, "garmentBox": {"size": {"x": 1.599, "y": 0.775, "z": 0.543}, "center": {"x": 0.005, "y": 0.161, "z": 0.505}}}, "garmentFPS": 6, "rects": {"background": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}, "garment": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}}}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Active
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Poor
+GFX Render Rate: 6 FPS
+Frame Inference: 167ms
+MediaPipe Tracking Speed:3 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category
+
+===== iter_10_armsdown (2026-09-26 15:24:48) =====
+[info] softWEAR | Build: 26/09/2026, 15:21:29
+[error] A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790423638.448000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790423638.464000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790423638.466000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[harness] page state: {"fitDebug": {"depth": 2.011, "position": {"x": 0.01, "y": 0.508, "z": 0.495}, "scale": 1, "yaw": -0.15, "shoulderSpan": 0.366, "measuredRigSpan": 0.333, "measuredClothWidth": 1.57, "trackedShoulderMid": {"x": 0.503011214516289, "y": 0.22859720985788723, "w": 0.10954838258054235}, "trackedHipsMid": {"x": 0.49784507954754725, "y": 0.5372886393457739}, "trackedNose": {"x": 0.4416245904579676, "y": 0.11491110081049112}, "garmentBox": {"size": {"x": 1.599, "y": 0.775, "z": 0.543}, "center": {"x": 0.007, "y": 0.297, "z": 0.519}}}, "garmentFPS": 7, "rects": {"background": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}, "garment": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}}}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Active
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Poor
+GFX Render Rate: 6 FPS
+Frame Inference: 167ms
+MediaPipe Tracking Speed:6 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category
+
+===== iter_10_armsdown (2026-09-26 15:31:17) =====
+[info] softWEAR | Build: 26/09/2026, 15:28:02
+[error] A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790424016.621000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790424016.645000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790424016.647000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[harness] page state: {"fitDebug": {"depth": 1.94, "position": {"x": 0.011, "y": 0.488, "z": 0.562}, "scale": 1, "yaw": -0.15, "shoulderSpan": 0.353, "measuredRigSpan": 0.333, "measuredClothWidth": 1.57, "trackedShoulderMid": {"x": 0.503402471329242, "y": 0.2299907972985284, "w": 0.10934576489932292}, "trackedHipsMid": {"x": 0.49952155204520327, "y": 0.5357135289197701}, "trackedNose": {"x": 0.4408500229138904, "y": 0.11327595983718358}, "garmentBox": {"size": {"x": 1.599, "y": 0.775, "z": 0.543}, "center": {"x": 0.007, "y": 0.277, "z": 0.587}}}, "garmentFPS": 3, "rects": {"background": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}, "garment": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}}}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Active
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Poor
+GFX Render Rate: 4 FPS
+Frame Inference: 250ms
+MediaPipe Tracking Speed:3 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category
+
+===== iter_10_armsspread_tpose (2026-09-26 15:35:03) =====
+[info] softWEAR | Build: 26/09/2026, 15:28:02
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] A bad HTTP response code (404) was received when fetching the script.
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790424241.694000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790424241.709000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790424241.711000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[harness] T-pose world landmarks injected
+[harness] page state: {"fitDebug": {"depth": 1.942, "position": {"x": 0.005, "y": 0.493, "z": 0.558}, "scale": 1, "yaw": 0.15, "shoulderSpan": 0.353, "measuredRigSpan": 0.333, "measuredClothWidth": 1.57, "trackedShoulderMid": {"x": 0.5014159730822526, "y": 0.22783941947348318, "w": 0.10965012553691729}, "trackedHipsMid": {"x": 0.49829018400204145, "y": 0.5354433162351933}, "trackedNose": {"x": 0.4404320110373321, "y": 0.11219924983845764}, "garmentBox": {"size": {"x": 1.599, "y": 0.775, "z": 0.543}, "center": {"x": 0.008, "y": 0.282, "z": 0.582}}}, "garmentFPS": 6, "rects": {"background": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}, "garment": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}}}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Active
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Poor
+GFX Render Rate: 6 FPS
+Frame Inference: 167ms
+MediaPipe Tracking Speed:5 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category
+
+===== iter_10_armsdown_retail (2026-09-26 15:36:42) =====
+[info] softWEAR | Build: 26/09/2026, 15:28:02
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] A bad HTTP response code (404) was received when fetching the script.
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[harness] retail front image set: C:\Users\Ali\Downloads\mirrorfit\tools\e2e\assets\solid_green_product.png
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790424352.996000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790424353.078000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790424353.081000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[harness] page state: {"fitDebug": {"depth": 1.962, "position": {"x": 0.008, "y": 0.496, "z": 0.543}, "scale": 1, "yaw": -0.15, "shoulderSpan": 0.353, "measuredRigSpan": 0.333, "measuredClothWidth": 1.57, "trackedShoulderMid": {"x": 0.5022757691977897, "y": 0.22825483787401507, "w": 0.10822229427851912}, "trackedHipsMid": {"x": 0.49782534171644355, "y": 0.5377117954693971}, "trackedNose": {"x": 0.44151109250543735, "y": 0.11408979269916317}, "garmentBox": {"size": {"x": 1.599, "y": 0.775, "z": 0.543}, "center": {"x": 0.004, "y": 0.285, "z": 0.567}}}, "garmentFPS": 34, "rects": {"background": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}, "garment": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}}}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Active
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Poor
+GFX Render Rate: 5 FPS
+Frame Inference: 200ms
+MediaPipe Tracking Speed:3 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category
+
+===== iter_11_armsdown (2026-09-26 15:39:43) =====
+[info] softWEAR | Build: 26/09/2026, 15:28:02
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] A bad HTTP response code (404) was received when fetching the script.
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790424521.702000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790424521.722000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790424521.724000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[error] Failed to initialise MediaPipe: Error: Camera startup timed out
+    at http://127.0.0.1:8000/3d/bundle.03322204a238d6479924.js:2:1233618
+[harness] page state: {"fitDebug": {"depth": 1.936, "position": {"x": 0.011, "y": 0.489, "z": 0.562}, "scale": 1, "yaw": -0.15, "shoulderSpan": 0.353, "measuredRigSpan": 0.333, "measuredClothWidth": 1.57, "trackedShoulderMid": {"x": 0.5032353159631682, "y": 0.22967425898038002, "w": 0.1100438277855664}, "trackedHipsMid": {"x": 0.4994386511683269, "y": 0.5351138335907788}, "trackedNose": {"x": 0.44102831202002973, "y": 0.11362495240548057}, "garmentBox": {"size": {"x": 1.599, "y": 0.775, "z": 0.543}, "center": {"x": 0.007, "y": 0.278, "z": 0.586}}}, "garmentFPS": 3, "rects": {"background": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}, "garment": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}}}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Active
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Poor
+GFX Render Rate: 4 FPS
+Frame Inference: 250ms
+MediaPipe Tracking Speed:3 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category
+
+===== iter_11_armsdown (2026-09-26 15:44:09) =====
+[error] A bad HTTP response code (404) was received when fetching the script.
+[info] softWEAR | Build: 26/09/2026, 15:28:02
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790424773.019000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790424773.056000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790424773.059000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[harness] page state: {"fitDebug": {"depth": 1.942, "position": {"x": 0.003, "y": 0.493, "z": 0.558}, "scale": 1, "yaw": -0.15, "shoulderSpan": 0.353, "measuredRigSpan": 0.333, "measuredClothWidth": 1.57, "trackedShoulderMid": {"x": 0.5010346547972463, "y": 0.22762250804277218, "w": 0.1096257365790041}, "trackedHipsMid": {"x": 0.49806086612220396, "y": 0.5355407384015975}, "trackedNose": {"x": 0.44049128571024687, "y": 0.11181758793158814}, "garmentBox": {"size": {"x": 1.599, "y": 0.775, "z": 0.543}, "center": {"x": -0.0, "y": 0.282, "z": 0.583}}}, "garmentFPS": 5, "rects": {"background": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}, "garment": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}}}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Active
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Fair
+GFX Render Rate: 16 FPS
+Frame Inference: 63ms
+MediaPipe Tracking Speed:1 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category
+
+===== iter_11_armsspread_tpose (2026-09-26 15:46:52) =====
+[error] A bad HTTP response code (404) was received when fetching the script.
+[info] softWEAR | Build: 26/09/2026, 15:28:02
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790424916.188000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790424916.250000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790424916.252000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[error] Failed to initialise MediaPipe: Error: Camera startup timed out
+    at http://127.0.0.1:8000/3d/bundle.03322204a238d6479924.js:2:1233618
+[harness] T-pose world landmarks injected
+[harness] page state: {"fitDebug": {"depth": 1.94, "position": {"x": 0.002, "y": 0.494, "z": 0.56}, "scale": 1, "yaw": 0.15, "shoulderSpan": 0.353, "measuredRigSpan": 0.333, "measuredClothWidth": 1.57, "trackedShoulderMid": {"x": 0.5005671347031452, "y": 0.22710596010086231, "w": 0.10971669806909869}, "trackedHipsMid": {"x": 0.4975502008528225, "y": 0.5375896464756176}, "trackedNose": {"x": 0.4403320672479125, "y": 0.11092616083526066}, "garmentBox": {"size": {"x": 1.599, "y": 0.775, "z": 0.543}, "center": {"x": 0.005, "y": 0.283, "z": 0.584}}}, "garmentFPS": 4, "rects": {"background": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}, "garment": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}}}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Active
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Poor
+GFX Render Rate: 2 FPS
+Frame Inference: 500ms
+MediaPipe Tracking Speed:2 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category
+
+===== iter_11_armsspread_tpose (2026-09-26 15:50:05) =====
+[info] softWEAR | Build: 26/09/2026, 15:28:02
+[error] A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790425124.898000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790425124.993000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790425125.001000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[harness] T-pose world landmarks injected
+[harness] page state: {"fitDebug": {"depth": 1.94, "position": {"x": 0.005, "y": 0.493, "z": 0.561}, "scale": 1, "yaw": 0.15, "shoulderSpan": 0.353, "measuredRigSpan": 0.333, "measuredClothWidth": 1.57, "trackedShoulderMid": {"x": 0.5014362066461271, "y": 0.22765311996893015, "w": 0.1097272978059011}, "trackedHipsMid": {"x": 0.49856587115312956, "y": 0.5350515132972467}, "trackedNose": {"x": 0.4405097585995661, "y": 0.1122765229529952}, "garmentBox": {"size": {"x": 1.599, "y": 0.775, "z": 0.543}, "center": {"x": 0.008, "y": 0.282, "z": 0.585}}}, "garmentFPS": 4, "rects": {"background": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}, "garment": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}}}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Active
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Poor
+GFX Render Rate: 4 FPS
+Frame Inference: 250ms
+MediaPipe Tracking Speed:2 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category
+
+===== iter_11_armsdown_retail (2026-09-26 15:52:57) =====
+[info] softWEAR | Build: 26/09/2026, 15:28:02
+[error] A bad HTTP response code (404) was received when fetching the script.
+[warning] softWEAR SW registration failed: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:8000/') with script ('http://127.0.0.1:8000/sw.js'): A bad HTTP response code (404) was received when fetching the script.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] Sound "maleSelected" not found. Did you preload it?
+[harness] retail front image set: C:\Users\Ali\Downloads\mirrorfit\tools\e2e\assets\solid_green_product.png
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] World-landmark pose model unavailable; using image landmarks.
+[warning] I0000 00:00:1790425330.667000       1 gl_context_webgl.cc:151] Successfully created a WebGL context with major version 3 and handle 3
+[warning] I0000 00:00:1790425330.727000       1 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)))
+[warning] W0000 00:00:1790425330.731000       1 gl_context.cc:1000] OpenGL error checking is disabled
+[harness] page state: {"fitDebug": {"depth": 1.946, "position": {"x": 0.006, "y": 0.495, "z": 0.553}, "scale": 1, "yaw": -0.15, "shoulderSpan": 0.353, "measuredRigSpan": 0.333, "measuredClothWidth": 1.57, "trackedShoulderMid": {"x": 0.5017399208069386, "y": 0.22737041552552945, "w": 0.10940128083527059}, "trackedHipsMid": {"x": 0.49867176207516006, "y": 0.5345967448212298}, "trackedNose": {"x": 0.4405291033563931, "y": 0.11206433275700314}, "garmentBox": {"size": {"x": 1.599, "y": 0.775, "z": 0.543}, "center": {"x": 0.002, "y": 0.284, "z": 0.578}}}, "garmentFPS": 6, "rects": {"background": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}, "garment": {"x": 172, "y": 17, "width": 960, "height": 540, "top": 17, "right": 1132, "bottom": 557, "left": 172}}}
+[harness] debug-panel:
+Debug Panel (Dev use only)
+Body Model: OFF
+Operational Status:
+Pose Detection: Active
+Garment: retailHoodie
+Physics: Enabled
+Gesture Control: Disabled
+Current Gesture: None
+Resolution: 1280×720
+Device: desktop
+Performance Metrics:
+Performance: Fair
+GFX Render Rate: 15 FPS
+Frame Inference: 67ms
+MediaPipe Tracking Speed:2 Hz
+RetailHoodie Mesh Info:
+File Size: 2083 KB
+Vertex Count: 94,841
+Controls:
+'Shift+D' - Toggle Panel
+'G' - Toggle Garment
+'M' - Toggle SMPL-X Body
+'P' - Toggle Physics
+'X' - Toggle Gesture Control
+'R' - Resume Detection
+Gestures (hold ~0.5s):
+Arm out right - Next Garment
+Arm out left - Previous Garment
+Peace Sign - Take Selfie
+Arms Crossed - Change Gender
+Hands Together - Change Category

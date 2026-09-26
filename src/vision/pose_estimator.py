@@ -55,6 +55,7 @@ class PoseResult:
     frame_size: Tuple[int, int]                     # (width, height)
     tracked: bool = True
     timestamp: float = field(default_factory=time.monotonic)
+    world_landmarks: Dict[int, Tuple[float, float, float]] = field(default_factory=dict)
 
     def point(self, index: int) -> Optional[Tuple[float, float]]:
         lm = self.landmarks.get(index)
@@ -148,6 +149,13 @@ class PoseResult:
     def torso_yaw_deg(self) -> float:
         """Signed torso yaw estimate in degrees. 0 = frontal. Positive = nose
         offset to the right of the shoulder midpoint (image coordinates)."""
+        left_world = self.world_landmarks.get(LM_LEFT_SHOULDER)
+        right_world = self.world_landmarks.get(LM_RIGHT_SHOULDER)
+        if left_world is not None and right_world is not None:
+            dx = right_world[0] - left_world[0]
+            dz = right_world[2] - left_world[2]
+            if abs(dx) + abs(dz) > 1e-5:
+                return float(np.clip(np.degrees(np.arctan2(dz, abs(dx))), -75, 75))
         nose = self.point(LM_NOSE)
         mid = self.shoulder_mid
         if nose is None or mid is None:
@@ -282,7 +290,14 @@ class PoseEstimator:
             sx, sy = self._filter.update(idx, lm.x * w, lm.y * h, lm.visibility)
             landmarks[idx] = Landmark(x=sx, y=sy, visibility=float(lm.visibility))
 
-        pose = PoseResult(landmarks=landmarks, frame_size=(w, h), tracked=True)
+        world = {}
+        if results.pose_world_landmarks:
+            world = {
+                idx: (float(lm.x), float(lm.y), float(lm.z))
+                for idx, lm in enumerate(results.pose_world_landmarks.landmark)
+            }
+        pose = PoseResult(landmarks=landmarks, frame_size=(w, h), tracked=True,
+                          world_landmarks=world)
         self._last_good = pose
         return pose
 
@@ -297,7 +312,8 @@ class PoseEstimator:
                 <= self.config.tracking.lost_pose_timeout_s):
             return PoseResult(landmarks=self._last_good.landmarks,
                               frame_size=self._last_good.frame_size,
-                              tracked=False)
+                              tracked=False,
+                              world_landmarks=self._last_good.world_landmarks)
         self._filter.clear()
         return None
 

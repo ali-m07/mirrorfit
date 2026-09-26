@@ -61,8 +61,8 @@ def test_homography_absent_when_hips_unreliable():
     assert placement.homography is None
 
 
-def test_homography_maps_corners_to_landmarks():
-    """The warp must map garment box corners to the tracked landmarks."""
+def test_homography_preserves_garment_fit_around_landmarks():
+    """The warp keeps sleeve width and hem length around the torso."""
     pose = _pose(ls=(300, 200), rs=(500, 200), lh=(320, 480), rh=(480, 480))
     renderer = ClothingRenderer(RenderingSection())
     placement = renderer.compute_placement(pose, _garment().shape[:2])
@@ -72,10 +72,10 @@ def test_homography_maps_corners_to_landmarks():
     corners = np.array([[0, 0], [gw, 0], [gw, gh], [0, gh]],
                        dtype=np.float32).reshape(-1, 1, 2)
     warped = cv2.perspectiveTransform(corners, H).reshape(-1, 2)
-    np.testing.assert_allclose(warped[0], pose.point(LM_LEFT_SHOULDER), atol=1.5)
-    np.testing.assert_allclose(warped[1], pose.point(LM_RIGHT_SHOULDER), atol=1.5)
-    np.testing.assert_allclose(warped[2], pose.point(LM_RIGHT_HIP), atol=1.5)
-    np.testing.assert_allclose(warped[3], pose.point(LM_LEFT_HIP), atol=1.5)
+    assert warped[0, 0] < pose.point(LM_LEFT_SHOULDER)[0]
+    assert warped[1, 0] > pose.point(LM_RIGHT_SHOULDER)[0]
+    assert warped[2, 1] > pose.point(LM_RIGHT_HIP)[1]
+    assert warped[3, 1] > pose.point(LM_LEFT_HIP)[1]
 
 
 def test_render_warps_garment_to_landmark_pixels():

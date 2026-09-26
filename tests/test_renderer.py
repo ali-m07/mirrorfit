@@ -161,6 +161,33 @@ def test_render_without_pose_is_noop() -> None:
     assert not frame.any()
 
 
+def test_perspective_fit_keeps_sleeves_and_hem() -> None:
+    renderer = ClothingRenderer(RenderingSection())
+    garment = _garment()
+    pose = _pose()
+    placement = renderer.compute_placement(pose, garment.shape[:2])
+    assert placement is not None and placement.homography is not None
+    import cv2
+    corners = np.array([[[0.0, 0.0], [placement.size[0], 0.0],
+                         [placement.size[0], placement.size[1]],
+                         [0.0, placement.size[1]]]], dtype=np.float32)
+    fitted = cv2.perspectiveTransform(corners, placement.homography)[0]
+    assert fitted[1, 0] - fitted[0, 0] > pose.shoulder_width_px * 1.3
+    assert fitted[2, 1] > pose.hip_mid[1]
+
+
+def test_garment_never_covers_face_above_shoulders() -> None:
+    renderer = ClothingRenderer(RenderingSection())
+    renderer.config.shadow.enabled = False
+    renderer.config.occlusion.use_arm_cutout = False
+    frame = np.zeros((600, 800, 3), dtype=np.uint8)
+    item = ClothingItem(id="oversized", name="oversized", filename="x.png",
+                        path=Path("x.png"), category="upper", anchor_top=0.35)
+    assert renderer.render(frame, _garment(), _pose(), item)
+    assert not frame[:160].any()
+    assert frame[300:, :, 1].max() > 0
+
+
 def test_render_dress_extends_toward_hips() -> None:
     # A pose with a very long torso, where the dress rule exceeds the default
     # aspect-ratio height and actually engages. shoulders=200px wide, torso

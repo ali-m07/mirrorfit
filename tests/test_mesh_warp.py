@@ -96,6 +96,21 @@ def test_render_uses_piecewise_when_elbows_visible():
     assert (frame > 0).any()
 
 
+def test_frontal_live_grid_moves_with_elbow_without_losing_fit():
+    renderer = ClothingRenderer(RenderingSection())
+    pose_a = _pose_with_elbows(le=(220, 320))
+    pose_b = _pose_with_elbows(le=(140, 320))
+    garment = _garment()
+    fit_a = renderer.compute_placement(pose_a, garment.shape[:2])
+    fit_b = renderer.compute_placement(pose_b, garment.shape[:2])
+    assert fit_a is not None and fit_b is not None
+    _, grid_a = renderer._build_mesh_grid(*fit_a.size, pose_a, placement=fit_a)
+    _, grid_b = renderer._build_mesh_grid(*fit_b.size, pose_b, placement=fit_b)
+    assert grid_b[1, 0, 0] < grid_a[1, 0, 0]
+    np.testing.assert_allclose(grid_a[0], grid_b[0], atol=1.0)
+    np.testing.assert_allclose(grid_a[-1], grid_b[-1], atol=1.0)
+
+
 def test_piecewise_warp_meets_realtime_budget():
     """Per-frame piecewise warp must finish in under 50ms on CPU.
 

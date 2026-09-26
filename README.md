@@ -256,6 +256,24 @@ The architecture is deliberately staged for commercial evolution:
 - **Lower-body & accessories**: pants/skirts anchored on hips, hats/glasses anchored on face landmarks (renderer already accepts per-category anchors).
 - **Multi-person try-on**: MediaPipe supports N poses; engine sessions become per-person.
 - **3D garments**: swap `ClothingRenderer` for a mesh renderer (smpl/3DMM body fit) behind the same engine interface.
+
+### TailorNet research bridge
+
+`tools/tailornet_export.py` accepts a separately configured TailorNet checkout,
+its weights and dataset, and an NPZ containing `theta` (72 SMPL pose values),
+`beta` (body shape), and `gamma` (garment style). It exports one predicted
+garment mesh as OBJ, which the existing mesh catalog can display. Example:
+
+```text
+python tools/tailornet_export.py --repo PATH_TO_TAILORNET --data-dir PATH_TO_DATA \
+  --weights-dir PATH_TO_WEIGHTS --input pose_shape_style.npz \
+  --output assets/clothes/tailornet_research.obj --garment-class t-shirt --gender male
+```
+
+TailorNet's upstream runner requires CUDA and its code/data are licensed for
+non-commercial use. The bridge does not convert webcam landmarks to SMPL pose,
+so exporting an OBJ is an offline research step, not live TailorNet inference.
+Do not use these assets in a commercial deployment without appropriate rights.
 - **Generative try-on**: use this pipeline's pose+segmentation conditioning to drive diffusion-based photorealistic warping as a post-pass.
 - **Mobile & in-browser**: the API/WebSocket layer is already the backend for a React Native app or a WebRTC/MediaPipe-JS client.
 - **SaaS control plane**: per-tenant catalogs (extra clothes dirs are config-driven), API keys, usage analytics from `SessionManager` counters, and branded themes per tenant.
